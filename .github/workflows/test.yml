@@ -41,13 +41,17 @@ jobs:
 
       - name: run tests
         run: |
+          set -e
           chmod +x .github/ubuntu_tester
-          ./.github/ubuntu_tester
+          ./webserv ./config/webserv.conf
+          ./.github/ubuntu_tester http://localhost:8080
 
       - name: run cgi tests
         run: |
-          chmod +x .github/ubuntu_tester
-          ./.github/ubuntu_tester
+          set -e
+          chmod +x .github/ubuntu_cgi_tester
+          ./webserv ./config/webserv.conf
+          ./.github/ubuntu_cgi_tester http://localhost:8080/cgi-bin/hello
 
       - name: check and install python
         run: |
@@ -62,4 +66,4 @@ jobs:
 
       - name: run py tests
         run: |
-          python3 .github/tests.py
+          python3 .github/py_tests/tests.py
