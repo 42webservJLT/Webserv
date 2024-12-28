@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  webserv-tests:
+    strategy:
+      fail-fast: true
+
+    name: cpp project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: install linting tools
+        run: |
+          apt-get update && apt-get install -y clang-format cppcheck
+
+      - name: check lint cpp files
+        run: |
+          find src -name "*.cpp" -exec clang-format --dry-run -Werror {} \;
+          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude src/
+        working-directory: .
+
+      - name: check lint hpp files
+        run: |
+          find inc -name "*.hpp" -exec clang-format --dry-run -Werror {} \;
+          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude inc/
+        working-directory: .
+
+      - name: build
+        run: |
+          make re
+
+      - name: run tests
+        run: |
+          make re
+          chmod +x .github/ubuntu_tester
+          ./.github/ubuntu_tester
+
+      - name: run cgi tests
+        run: |
+          make re
+          chmod +x .github/ubuntu_tester
+          ./.github/ubuntu_tester
+
+      - name: run py tests
+        run: |
+          python .github/tests.py
