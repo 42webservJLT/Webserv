@@ -27,15 +27,17 @@ jobs:
 
       - name: check lint cpp files
         run: |
-          find src -name "*.cpp" -exec clang-format --dry-run -Werror {} \;
-          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude src/
-        working-directory: .
+          set -e
+          find . -type f -name "*.cpp" -exec clang-format --dry-run -Werror {} \;
+          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude .
+        working-directory: src
 
       - name: check lint hpp files
         run: |
-          find inc -name "*.hpp" -exec clang-format --dry-run -Werror {} \;
-          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude inc/
-        working-directory: .
+          set -e
+          find . -type f -name "*.hpp" -exec clang-format --dry-run -Werror {} \;
+          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude .
+        working-directory: inc
 
       - name: build
         run: |
@@ -53,6 +55,17 @@ jobs:
           chmod +x .github/ubuntu_tester
           ./.github/ubuntu_tester
 
+      - name: check and install python
+        run: |
+          if ! command -v python3 &> /dev/null || [ $(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))') != "3.10" ]; then
+            sudo apt-get update
+            sudo apt-get install -y python3
+          fi
+          if [ -f ".github/py_tests/requirements.txt" ]; then
+            pip3 install -r requirements.txt
+          fi
+        working-directory: .github/py_tests
+
       - name: run py tests
         run: |
-          python .github/tests.py
+          python3 .github/tests.py
