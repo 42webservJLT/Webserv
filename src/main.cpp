@@ -7,6 +7,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    (void)argv;
+
     std::cout << "Hello webserv" << std::endl;
     // [...]
 }

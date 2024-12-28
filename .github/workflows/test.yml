@@ -27,13 +27,11 @@ jobs:
 
       - name: check lint cpp files
         run: |
-          set -e
           cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude --quiet .
         working-directory: src
 
       - name: check lint hpp files
         run: |
-          set -e
           find . -type f -name "*.hpp" -exec cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude --quiet {} \;
         working-directory: inc
 
@@ -43,13 +41,11 @@ jobs:
 
       - name: run tests
         run: |
-          make re
           chmod +x .github/ubuntu_tester
           ./.github/ubuntu_tester
 
       - name: run cgi tests
         run: |
-          make re
           chmod +x .github/ubuntu_tester
           ./.github/ubuntu_tester
 
