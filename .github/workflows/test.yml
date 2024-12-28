@@ -28,13 +28,13 @@ jobs:
       - name: check lint cpp files
         run: |
           set -e
-          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude .
+          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude --quiet .
         working-directory: src
 
       - name: check lint hpp files
         run: |
           set -e
-          cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude .
+          find . -type f -name "*.hpp" -exec cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude --quiet {} \;
         working-directory: inc
 
       - name: build
