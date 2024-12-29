@@ -4,9 +4,10 @@ CPP := c++
 CPPFLAGS := -Wextra -Wall -Werror -std=c++17 -I./inc
 
 SRCDIR := ./src
-# [...]
+SRC += $(addprefix $(SRCDIR)/config/, ServerConfig.cpp)
+SRC += $(addprefix $(SRCDIR)/parsing/, Parser.cpp)
 SRC := $(addprefix $(SRCDIR)/, main.cpp)
-# SRC += [...]
+
 OBJDIR = ./obj
 OBJ := $(addprefix $(OBJDIR)/, $(notdir $(SRC:.cpp=.o)))
 
