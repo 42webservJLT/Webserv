@@ -7,6 +7,19 @@
 
 class RouteConfig {
     public:
+        RouteConfig(
+            const std::string& path,
+            const std::string& root,
+            const std::vector<std::string>& index,
+            const std::set<std::string>& allowedMethods,
+            bool autoindex,
+            const std::string& redirect,
+            const std::map<std::string, std::string>& cgiExtensions,
+            const std::string& uploadDir,
+            size_t clientMaxBodySize
+        );
+        ~RouteConfig();
+
         std::string                     path;
         std::string                     root;
         std::vector<std::string>        index;

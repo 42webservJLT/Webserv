@@ -3,6 +3,30 @@
 /* ----------------------------------------------------------------------------------- */
 /* Constructor & Destructor                                                            */
 /* ----------------------------------------------------------------------------------- */
+RouteConfig::RouteConfig(
+    const std::string& path,
+    const std::string& root,
+    const std::vector<std::string>& index,
+    const std::set<std::string>& allowedMethods,
+    bool autoindex,
+    const std::string& redirect,
+    const std::map<std::string, std::string>& cgiExtensions,
+    const std::string& uploadDir,
+    size_t clientMaxBodySize
+) {
+    path = path;
+    root = root;
+    index = index;
+    allowedMethods = allowedMethods;
+    autoindex = autoindex;
+    redirect = redirect;
+    cgiExtensions = cgiExtensions;
+    uploadDir = uploadDir;
+    clientMaxBodySize = clientMaxBodySize;
+}
+
+RouteConfig::~RouteConfig() {}
+
 ServerConfig::ServerConfig(
     const std::string& host,
     uint16_t port,
