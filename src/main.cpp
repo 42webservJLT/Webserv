@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        std::cerr << "usage: ./webser [config file]" << std::endl;
+        std::cerr << "usage: ./webserv [config file]" << std::endl;
         return 1;
     }
 
