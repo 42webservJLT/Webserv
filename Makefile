@@ -27,6 +27,9 @@ lint:
 	cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude ./src
 	find ./inc -type f -name "*.hpp" -exec cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude {} \;
 
+tparse:
+	echo TODO
+
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	mkdir -p $(OBJDIR)
 	$(CPP) $(CPPFLAGS) -c $< -o $@
