@@ -19,6 +19,22 @@ ServerConfig::ServerConfig(
     _routes = routes;
 }
 
+ServerConfig::ServerConfig(const ServerConfig& other) {
+    *this = other;
+}
+
+ServerConfig& ServerConfig::operator=(const ServerConfig& other) {
+    if (this != &other) {
+        _host = other._host;
+        _port = other._port;
+        _serverNames = other._serverNames;
+        _clientMaxBodySize = other._clientMaxBodySize;
+        _errorPages = other._errorPages;
+        _routes = other._routes;
+    }
+    return *this;
+}
+
 ServerConfig::~ServerConfig() {}
 
 /* ----------------------------------------------------------------------------------- */
@@ -136,6 +152,25 @@ RouteConfig::RouteConfig(
     cgiExtensions = cgiExtensions;
     uploadDir = uploadDir;
     clientMaxBodySize = clientMaxBodySize;
+}
+
+RouteConfig::RouteConfig(const RouteConfig& other) {
+    *this = other;
+}
+
+RouteConfig& RouteConfig::operator=(const RouteConfig& other) {
+    if (this != &other) {
+        path = other.path;
+        root = other.root;
+        index = other.index;
+        allowedMethods = other.allowedMethods;
+        autoindex = other.autoindex;
+        redirect = other.redirect;
+        cgiExtensions = other.cgiExtensions;
+        uploadDir = other.uploadDir;
+        clientMaxBodySize = other.clientMaxBodySize;
+    }
+    return *this;
 }
 
 RouteConfig::~RouteConfig() {}
