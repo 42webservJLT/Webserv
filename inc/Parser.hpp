@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "HTTPStatus.hpp"
 #include "ServerConfig.hpp"
@@ -12,9 +13,8 @@ class Parser {
         ~Parser();
         Parser& operator=(const Parser& other);
 
-        // parses the config file and returns a Config object
-        Config& Parse();
+        std::vector<ServerConfig>& ParseConfig();
         // [...]
     private:
-        // TODO
+        std::string _path;
 }
