@@ -101,8 +101,8 @@ const RouteConfig& ServerConfig::GetRoute(const std::string& path) const {
 /* ServerConfig Marshalling                                                            */
 /* ----------------------------------------------------------------------------------- */
 // Unmarshalls a string containing ONLY server config information into a ServerConfig object
-void ServerConfig::Unmarshall(std::string str) {
-    std::sstream ss(str);
+void ServerConfig::Unmarshall(std::string& str) {
+    std::stringstream ss(str);
 
     // vars to unmarshall into:
     std::string host; // required
@@ -114,7 +114,7 @@ void ServerConfig::Unmarshall(std::string str) {
 }
 
 // Returns true if the server config is valid, false otherwise
-bool ServerConfig::isValid() const {
+bool ServerConfig::IsValid() const {
     // Required server fields
     if (_host.empty() || _port == 0 || _routes.empty())
         return false;
@@ -127,74 +127,4 @@ bool ServerConfig::isValid() const {
     }
     
     return true;
-}
-
-/* ----------------------------------------------------------------------------------- */
-/* RouteConfig Constructor & Destructor                                                */
-/* ----------------------------------------------------------------------------------- */
-RouteConfig::RouteConfig(
-    const std::string& path,
-    const std::string& root,
-    const std::vector<std::string>& index,
-    const std::set<std::string>& allowedMethods,
-    bool autoindex,
-    const std::string& redirect,
-    const std::map<std::string, std::string>& cgiExtensions,
-    const std::string& uploadDir,
-    size_t clientMaxBodySize
-) {
-    path = path;
-    root = root;
-    index = index;
-    allowedMethods = allowedMethods;
-    autoindex = autoindex;
-    redirect = redirect;
-    cgiExtensions = cgiExtensions;
-    uploadDir = uploadDir;
-    clientMaxBodySize = clientMaxBodySize;
-}
-
-RouteConfig::RouteConfig(const RouteConfig& other) {
-    *this = other;
-}
-
-RouteConfig& RouteConfig::operator=(const RouteConfig& other) {
-    if (this != &other) {
-        path = other.path;
-        root = other.root;
-        index = other.index;
-        allowedMethods = other.allowedMethods;
-        autoindex = other.autoindex;
-        redirect = other.redirect;
-        cgiExtensions = other.cgiExtensions;
-        uploadDir = other.uploadDir;
-        clientMaxBodySize = other.clientMaxBodySize;
-    }
-    return *this;
-}
-
-RouteConfig::~RouteConfig() {}
-
-/* ----------------------------------------------------------------------------------- */
-/* RouteConfig Unmarshalling                                                           */
-/* ----------------------------------------------------------------------------------- */
-// Unmarshalls a string containing ONLY route config information into a RouteConfig object
-void RouteConfig::Unmarshall(std::string str) {
-    std::sstream ss(str);
-
-    // vars to unmarshall into:
-    std::string path; // required
-    std::string root; // required
-    std::vector<std::string> index; // required
-    std::set<std::string> allowedMethods; // required
-    bool autoindex; // required
-    std::string redirect; // required
-    std::map<std::string, std::string> cgiExtensions; // required
-    std::string uploadDir; // required
-    size_t clientMaxBodySize; // required
-}
-
-// Returns true if the server config is valid, false otherwise
-bool RouteConfig::isValid() const {
-    // TODO: implement this
 }
