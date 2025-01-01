@@ -32,3 +32,6 @@
 *.app
 **/webserv
 **/ParserTest
+
+# Others
+**/.idea
