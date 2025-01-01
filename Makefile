@@ -2,6 +2,7 @@ NAME := webserv
 
 CPP := c++
 CPPFLAGS := -Wextra -Wall -Werror -std=c++17 -I./inc
+TESTFLAGS := -Wextra -Wall -std=c++17 -I./inc
 
 SRCDIR := ./src
 SRC += $(addprefix $(SRCDIR)/config/, ServerConfig.cpp)
@@ -29,7 +30,7 @@ lint:
 	find ./inc -type f -name "*.hpp" -exec cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude {} \;
 
 tparse:
-	echo TODO
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/parsing/Parser.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/parsing/TestParser.cpp -o ParserTest
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	mkdir -p $(OBJDIR)

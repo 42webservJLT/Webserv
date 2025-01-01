@@ -2,6 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
 #include "HTTPStatus.hpp"
 #include "ServerConfig.hpp"
@@ -13,8 +16,8 @@ class Parser {
         ~Parser();
         Parser& operator=(const Parser& other);
 
-        std::vector<ServerConfig>& ParseConfig();
+        std::vector<ServerConfig> ParseConfig();
         // [...]
     private:
         std::string _path;
-}
+};
