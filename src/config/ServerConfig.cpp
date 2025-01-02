@@ -3,6 +3,8 @@
 /* ----------------------------------------------------------------------------------- */
 /* ServerConfig Constructor & Destructor                                               */
 /* ----------------------------------------------------------------------------------- */
+ServerConfig::ServerConfig() {}
+
 ServerConfig::ServerConfig(
     const std::string& host,
     uint16_t port,
@@ -101,16 +103,52 @@ const RouteConfig& ServerConfig::GetRoute(const std::string& path) const {
 /* ServerConfig Marshalling                                                            */
 /* ----------------------------------------------------------------------------------- */
 // Unmarshalls a string containing ONLY server config information into a ServerConfig object
-void ServerConfig::Unmarshall(std::string& str) {
-    std::stringstream ss(str);
+bool ServerConfig::Unmarshall(std::string& str) {
+	std::stringstream ss(str);
 
-    // vars to unmarshall into:
-    std::string host; // required
-    uint16_t port; // required
-    std::vector<std::string> serverNames; // NOT required
-    size_t clientMaxBodySize;
-    std::map<uint16_t, std::string> errorPages;
-    std::map<std::string, RouteConfig> routes; // AT LEAST ONE required
+	// vars to unmarshall into:
+	std::string host; // required, ONLY ONE
+	uint16_t port; // required, ONLY ONE
+	std::vector<std::string> serverNames; // NOT required, default to empty: ""
+	size_t clientMaxBodySize; // NOT required, default to 1MB
+	std::map<uint16_t, std::string> errorPages; // NOT required, default to empty
+	std::map<std::string, RouteConfig> routes; // AT LEAST ONE required
+
+	// Unmarshall
+	std::string line;
+	while (std::getline(ss, line)) {
+		if (line.empty()) {
+			continue;
+		} else if (!_lineValid(line)) {
+			return false;
+		}
+		
+		if (line.size() >= 5 && line.substr(0, 5) == "host ") {
+			if (!_handleHost(line, host)) {
+				return false;
+			}
+		} else if (line.size() >= 5 && line.substr(0, 5) == "port ") {
+			if (!_handlePort(line, port)) {
+				return false;
+			}
+		} else if (line.size() >= 12 && line.substr(0, 12) == "server_name ") {
+			if (!_handleServerName(line, serverNames)) {
+				return false;
+			}
+		} else if (line.size() >= 20 && line.substr(0, 20) == "client_max_body_size ") {
+			clientMaxBodySize = std::stoi(line.substr(20));
+		} else if (line.size() >= 11 && line.substr(0, 11) == "error_page ") {
+			if (!_handleErrorPage(line, errorPages)) {
+				return false;
+			}
+		} else if (line.size() >= 9 && line.substr(0, 9) == "location ") {
+			if (!_handleLocation(line, routes)) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 }
 
 // Returns true if the server config is valid, false otherwise
@@ -120,11 +158,96 @@ bool ServerConfig::IsValid() const {
         return false;
         
     // Required location fields
-    for (std::map<std::string, RouteConfig>::const_iterator it = _routes.begin(); 
+    for (std::map<std::string, RouteConfig>::const_iterator it = _routes.begin();
          it != _routes.end(); ++it) {
         if (it->second.root.empty() || it->second.allowedMethods.empty())
             return false;
     }
     
     return true;
+}
+
+bool _lineValid(std::string& line) {
+	// check if line is a comment
+	if (line[0] == '#') {
+		return true;
+	}
+	return true;
+}
+
+bool _handleHost(std::string& line, std::string& host) {
+	// split line containing host by  space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 2) {
+		return false;
+	}
+	host = tokens[1];
+	return true;
+}
+
+bool _handlePort(std::string& line, uint16_t& port) {
+	// split line containing port by  space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 2) {
+		return false;
+	}
+	port = std::stoi(tokens[1]);
+	return true;
+}
+
+bool _handleServerName(std::string& line, std::vector<std::string>& serverNames) {
+	// split line containing server_name by space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() == 1) {
+		return false;
+	}
+	serverNames.push_back(tokens[1]);
+	return true;
+}
+
+bool _handleErrorPage(std::string& line, std::map<uint16_t, std::string>& errorPages) {
+	// split line containing error_page by space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 3) {
+		return false;
+	}
+	errorPages[std::stoi(tokens[1])] = tokens[2];
+	return true;
+}
+
+bool _handleLocation(std::string& line, std::map<std::string, RouteConfig>& routes) {
+	// split line containing location by space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 2) {
+		return false;
+	}
+	RouteConfig route;
+	route.root = tokens[1];
+	routes[tokens[1]] = route;
+	return true;
 }
