@@ -1,24 +1,31 @@
 #include "ServerConfig.hpp"
 
+bool _lineValid(std::string& line);
+bool _handleHost(std::string& line, std::string& host);
+bool _handlePort(std::string& line, uint16_t& port);
+bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
+bool _handleErrorPage(std::string& line, std::map<uint16_t, std::string>& errorPages);
+bool _handleLocation(std::string& line, std::map<std::string, RouteConfig>& routes);
+
 /* ----------------------------------------------------------------------------------- */
 /* ServerConfig Constructor & Destructor                                               */
 /* ----------------------------------------------------------------------------------- */
 ServerConfig::ServerConfig() {}
 
 ServerConfig::ServerConfig(
-    const std::string& host,
-    uint16_t port,
-    const std::vector<std::string>& serverNames,
-    size_t clientMaxBodySize,
-    std::map<uint16_t, std::string> errorPages,
-    std::map<std::string, RouteConfig> routes
+	const std::string& host,
+	uint16_t port,
+	const std::vector<std::string>& serverNames,
+	size_t clientMaxBodySize,
+	std::map<uint16_t, std::string> errorPages,
+	std::map<std::string, RouteConfig> routes
 ) {
-    _host = host;
-    _port = port;
-    _serverNames = serverNames;
-    _clientMaxBodySize = clientMaxBodySize;
-    _errorPages = errorPages;
-    _routes = routes;
+	_host = host;
+	_port = port;
+	_serverNames = serverNames;
+	_clientMaxBodySize = clientMaxBodySize;
+	_errorPages = errorPages;
+	_routes = routes;
 }
 
 ServerConfig::ServerConfig(const ServerConfig& other) {
@@ -26,15 +33,15 @@ ServerConfig::ServerConfig(const ServerConfig& other) {
 }
 
 ServerConfig& ServerConfig::operator=(const ServerConfig& other) {
-    if (this != &other) {
-        _host = other._host;
-        _port = other._port;
-        _serverNames = other._serverNames;
-        _clientMaxBodySize = other._clientMaxBodySize;
-        _errorPages = other._errorPages;
-        _routes = other._routes;
-    }
-    return *this;
+	if (this != &other) {
+		_host = other._host;
+		_port = other._port;
+		_serverNames = other._serverNames;
+		_clientMaxBodySize = other._clientMaxBodySize;
+		_errorPages = other._errorPages;
+		_routes = other._routes;
+	}
+	return *this;
 }
 
 ServerConfig::~ServerConfig() {}
@@ -149,30 +156,64 @@ bool ServerConfig::Unmarshall(std::string& str) {
 			return false;
 		}
 	}
+
+	// Set the unmarshalled values
+	_host = host;
+	_port = port;
+	_serverNames = serverNames;
+	_clientMaxBodySize = clientMaxBodySize;
+	_errorPages = errorPages;
+	_routes = routes;
+
+	return true;
 }
 
 // Returns true if the server config is valid, false otherwise
 bool ServerConfig::IsValid() const {
-    // Required server fields
-    if (_host.empty() || _port == 0 || _routes.empty())
-        return false;
-        
-    // Required location fields
-    for (std::map<std::string, RouteConfig>::const_iterator it = _routes.begin();
-         it != _routes.end(); ++it) {
-        if (it->second.root.empty() || it->second.allowedMethods.empty())
-            return false;
-    }
-    
-    return true;
+	// Required server fields
+	if (_host.empty() || _port == 0 || _routes.empty())
+		return false;
+		
+	// Required location fields
+	for (std::map<std::string, RouteConfig>::const_iterator it = _routes.begin();
+			it != _routes.end(); ++it) {
+		if (it->second.root.empty() || it->second.allowedMethods.empty())
+			return false;
+	}
+
+	return true;
 }
 
+// checks if a line is valid to begin with
 bool _lineValid(std::string& line) {
-	// check if line is a comment
-	if (line[0] == '#') {
+	// a line is valid if ...
+	// 1. it is the server line
+	if (line.size() >= 6 && line.substr(0, 6) == "server") {
+		std::stringstream ss(line);
+		std::string token;
+		std::vector<std::string> tokens;
+		while (std::getline(ss, token, ' ')) {
+			tokens.push_back(token);
+		}
+
+		if (tokens.size() != 2) {
+			return false;
+		} else if (tokens[1] != "{") {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// 2. it is the last line of the server block
+	else if (line.size() == 1 && line[0] == '}') {
 		return true;
 	}
-	return true;
+	// 3. it ends with ';'
+	else if (line.back() == ';') {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool _handleHost(std::string& line, std::string& host) {
