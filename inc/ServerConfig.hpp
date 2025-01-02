@@ -6,14 +6,30 @@
 #include <set>
 #include <sstream>
 #include <iostream>
+#include "HTTPStatus.hpp"
 #include "RouteConfig.hpp"
 
+// default values
 #define DEFAULT_HOST_NAME ""
 #define DEFAULT_PORT 0
 #define DEFAULT_SERVER_NAME ""
 #define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576
-#define DEFAULT_ERROR_PAGE_PATH "" // TODO: change
 
+// error paths
+#define DEFAULT_BAD_REQUEST_PATH "/400.html"
+#define DEFAULT_UNAUTHORIZED_PATH "/401.html"
+#define DEFAULT_FORBIDDEN_PATH "/403.html"
+#define DEFAULT_NOT_FOUND_PATH "/404.html"
+#define DEFAULT_METHOD_NOT_ALLOWED_PATH "/405.html"
+#define DEFAULT_PAYLOAD_TOO_LARGE_PATH "/413.html"
+#define DEFAULT_URI_TOO_LONG_PATH "/414.html"
+#define DEFAULT_INTERNAL_SERVER_ERROR_PATH "/500.html"
+#define DEFAULT_NOT_IMPLEMENTED_PATH "/501.html"
+#define DEFAULT_BAD_GATEWAY_PATH "/502.html"
+#define DEFAULT_SERVICE_UNAVAILABLE_PATH "/503.html"
+#define DEFAULT_GATEWAY_TIMEOUT_PATH "/504.html"
+
+// holds the config of a single server
 class ServerConfig {
 	public:
 		// Constructor & Destructor
@@ -23,7 +39,7 @@ class ServerConfig {
 			uint16_t port,
 			const std::vector<std::string>& serverNames,
 			size_t clientMaxBodySize,
-			std::map<uint16_t, std::string> errorPages,
+			std::map<HttpStatus, std::string> errorPages,
 			std::map<std::string, RouteConfig> routes
 		);
 		ServerConfig(const ServerConfig& other);
@@ -35,7 +51,7 @@ class ServerConfig {
 		void SetPort(uint16_t port);
 		void AddServerName(const std::string& name);
 		void SetClientMaxBodySize(size_t size);
-		void AddErrorPage(uint16_t code, const std::string& path);
+		void AddErrorPage(HttpStatus code, const std::string& path);
 		void AddRoute(const std::string& path, const RouteConfig& config);
 
 		// Getters
@@ -44,7 +60,7 @@ class ServerConfig {
 		const std::vector<std::string>& GetServerNames() const;
 		size_t GetClientMaxBodySize() const;
 		const std::map<uint16_t, std::string>& GetErrorPages() const;
-		const std::string& GetErrorPage(uint16_t code) const;
+		const std::string& GetErrorPage(HttpStatus code) const;
 		const std::map<std::string, RouteConfig>& GetRoutes() const;
 		const RouteConfig& GetRoute(const std::string& path) const;
 
@@ -64,7 +80,7 @@ class ServerConfig {
 		// clientMaxBodySize: the maximum body size of the client
 		size_t                              _clientMaxBodySize;
 		// errorPages: the error pages of the server
-		std::map<uint16_t, std::string>     _errorPages;
+		std::map<HttpStatus, std::string>     _errorPages;
 		// routes: the routes of the server
 		std::map<std::string, RouteConfig>  _routes;
 };

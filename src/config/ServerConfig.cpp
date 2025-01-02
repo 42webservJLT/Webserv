@@ -5,6 +5,7 @@ bool _handleHost(std::string& line, std::string& host);
 bool _handlePort(std::string& line, uint16_t& port);
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
 bool _handleErrorPage(std::string& line, std::map<uint16_t, std::string>& errorPages);
+bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
 bool _handleLocation(std::string& line, std::map<std::string, RouteConfig>& routes);
 
 /* ----------------------------------------------------------------------------------- */
@@ -17,7 +18,7 @@ ServerConfig::ServerConfig(
 	uint16_t port,
 	const std::vector<std::string>& serverNames,
 	size_t clientMaxBodySize,
-	std::map<uint16_t, std::string> errorPages,
+	std::map<HttpStatus, std::string> errorPages,
 	std::map<std::string, RouteConfig> routes
 ) {
 	_host = host;
@@ -64,7 +65,7 @@ void ServerConfig::SetClientMaxBodySize(size_t size) {
     _clientMaxBodySize = size;
 }
 
-void ServerConfig::AddErrorPage(uint16_t code, const std::string& path) {
+void ServerConfig::AddErrorPage(HttpStatus code, const std::string& path) {
     _errorPages[code] = path;
 }
 
@@ -90,11 +91,11 @@ size_t ServerConfig::GetClientMaxBodySize() const {
     return _clientMaxBodySize;
 }
 
-const std::map<uint16_t, std::string>& ServerConfig::GetErrorPages() const {
+const std::map<HttpStatus, std::string>& ServerConfig::GetErrorPages() const {
     return _errorPages;
 }
 
-const std::string& ServerConfig::GetErrorPage(uint16_t code) const {
+const std::string& ServerConfig::GetErrorPage(HttpStatus code) const {
     return _errorPages.at(code);
 }
 
@@ -116,7 +117,7 @@ bool ServerConfig::Unmarshall(std::string& str) {
 	uint16_t port = DEFAULT_PORT; // required, ONLY ONE
 	std::vector<std::string> serverNames; // NOT required, default to empty: ""
 	size_t clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE; // NOT required, default to 1MB
-	std::map<uint16_t, std::string> errorPages; // NOT required, default to empty
+	std::map<HttpStatus, std::string> errorPages; // NOT required, default to empty
 	std::map<std::string, RouteConfig> routes; // AT LEAST ONE required
 
 	// unmarshall
@@ -142,7 +143,9 @@ bool ServerConfig::Unmarshall(std::string& str) {
 				return false;
 			}
 		} else if (line.size() >= 20 && line.substr(0, 20) == "client_max_body_size ") {
-			clientMaxBodySize = std::stoi(line.substr(20));
+			if (!_handleClientMaxBodySize(line, clientMaxBodySize)) {
+				return false;
+			}
 		} else if (line.size() >= 11 && line.substr(0, 11) == "error_page ") {
 			if (!_handleErrorPage(line, errorPages)) {
 				return false;
@@ -156,14 +159,29 @@ bool ServerConfig::Unmarshall(std::string& str) {
 		}
 	}
 
-	// validate all required fields are present
+	// fill & validate all empty fields with default values
 	if (host == DEFAULT_HOST_NAME
 		|| port == DEFAULT_PORT
 		|| routes.empty()
 	) {
 		return false;
-	} else if (routes.empty()) {
-		return false;
+	} else if (serverNames.empty()) {
+		serverNames.push_back(DEFAULT_SERVER_NAME);
+	}
+
+	if (errorPages.empty()) {
+		errorPages[HttpStatus::BAD_REQUEST] = DEFAULT_BAD_REQUEST_PATH;
+		errorPages[HttpStatus::UNAUTHORIZED] = DEFAULT_UNAUTHORIZED_PATH;
+		errorPages[HttpStatus::FORBIDDEN] = DEFAULT_FORBIDDEN_PATH;
+		errorPages[HttpStatus::NOT_FOUND] = DEFAULT_NOT_FOUND_PATH;
+		errorPages[HttpStatus::METHOD_NOT_ALLOWED] = DEFAULT_METHOD_NOT_ALLOWED_PATH;
+		errorPages[HttpStatus::PAYLOAD_TOO_LARGE] = DEFAULT_PAYLOAD_TOO_LARGE_PATH;
+		errorPages[HttpStatus::URI_TOO_LONG] = DEFAULT_URI_TOO_LONG_PATH;
+		errorPages[HttpStatus::INTERNAL_SERVER_ERROR] = DEFAULT_INTERNAL_SERVER_ERROR_PATH;
+		errorPages[HttpStatus::NOT_IMPLEMENTED] = DEFAULT_NOT_IMPLEMENTED_PATH;
+		errorPages[HttpStatus::BAD_GATEWAY] = DEFAULT_BAD_GATEWAY_PATH;
+		errorPages[HttpStatus::SERVICE_UNAVAILABLE] = DEFAULT_SERVICE_UNAVAILABLE_PATH;
+		errorPages[HttpStatus::GATEWAY_TIMEOUT] = DEFAULT_GATEWAY_TIMEOUT_PATH;
 	}
 
 	// set the unmarshalled values
@@ -209,6 +227,7 @@ bool _lineValid(std::string& line) {
 	}
 }
 
+// gets the host name
 bool _handleHost(std::string& line, std::string& host) {
 	// split line containing host by  space chars
 	std::istringstream iss(line);
@@ -224,6 +243,7 @@ bool _handleHost(std::string& line, std::string& host) {
 	return true;
 }
 
+// gets the port number
 bool _handlePort(std::string& line, uint16_t& port) {
 	// split line containing port by  space chars
 	std::istringstream iss(line);
@@ -235,10 +255,17 @@ bool _handlePort(std::string& line, uint16_t& port) {
 	if (tokens.size() != 2) {
 		return false;
 	}
-	port = std::stoi(tokens[1]);
+
+	try {
+		port = std::stoi(tokens[1]);
+	} catch (std::exception& e) {
+		return false;
+	}
+
 	return true;
 }
 
+// gets the server names
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames) {
 	// split line containing server_name by space chars
 	std::istringstream iss(line);
@@ -250,11 +277,15 @@ bool _handleServerName(std::string& line, std::vector<std::string>& serverNames)
 	if (tokens.size() == 1) {
 		return false;
 	}
-	serverNames.push_back(tokens[1]);
+
+	for (size_t i = 1; i < tokens.size(); i++) {
+		serverNames.push_back(tokens[i]);
+	}
+
 	return true;
 }
 
-bool _handleErrorPage(std::string& line, std::map<uint16_t, std::string>& errorPages) {
+bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& errorPages) {
 	// split line containing error_page by space chars
 	std::istringstream iss(line);
 	std::vector<std::string> tokens;
@@ -265,7 +296,78 @@ bool _handleErrorPage(std::string& line, std::map<uint16_t, std::string>& errorP
 	if (tokens.size() != 3) {
 		return false;
 	}
-	errorPages[std::stoi(tokens[1])] = tokens[2];
+	
+	// handle error code
+	int c;
+	try {
+		c = std::stoi(tokens[1]);
+	} catch (std::exception& e) {
+		return false;
+	}
+
+	// assign to enum
+	switch (c) {
+		case 400:
+			errorPages[HttpStatus::BAD_REQUEST] = tokens[2];
+			break;
+		case 401:
+			errorPages[HttpStatus::UNAUTHORIZED] = tokens[2];
+			break;
+		case 403:
+			errorPages[HttpStatus::FORBIDDEN] = tokens[2];
+			break;
+		case 404:
+			errorPages[HttpStatus::NOT_FOUND] = tokens[2];
+			break;
+		case 405:
+			errorPages[HttpStatus::METHOD_NOT_ALLOWED] = tokens[2];
+			break;
+		case 413:
+			errorPages[HttpStatus::PAYLOAD_TOO_LARGE] = tokens[2];
+			break;
+		case 414:
+			errorPages[HttpStatus::URI_TOO_LONG] = tokens[2];
+			break;
+		case 500:
+			errorPages[HttpStatus::INTERNAL_SERVER_ERROR] = tokens[2];
+			break;
+		case 501:
+			errorPages[HttpStatus::NOT_IMPLEMENTED] = tokens[2];
+			break;
+		case 502:
+			errorPages[HttpStatus::BAD_GATEWAY] = tokens[2];
+			break;
+		case 503:
+			errorPages[HttpStatus::SERVICE_UNAVAILABLE] = tokens[2];
+			break;
+		case 504:
+			errorPages[HttpStatus::GATEWAY_TIMEOUT] = tokens[2];
+			break;
+		default:
+			return false;
+	}
+
+	return true;
+}
+
+bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
+	// split line containing client_max_body_size by space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 2) {
+		return false;
+	}
+
+	try {
+		clientMaxBodySize = std::stoi(tokens[1]);
+	} catch (std::exception& e) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -277,11 +379,14 @@ bool _handleLocation(std::string& line, std::map<std::string, RouteConfig>& rout
 	while (std::getline(iss, token, ' ')) {
 		tokens.push_back(token);
 	}
-	if (tokens.size() != 2) {
+	if (tokens.size() != 3 || tokens[2] != "{") {
 		return false;
 	}
+
 	RouteConfig route;
-	route.root = tokens[1];
-	routes[tokens[1]] = route;
+	if (!route.Unmarshall(line)) {
+		return false;
+	}
+
 	return true;
 }
