@@ -59,7 +59,7 @@ class ServerConfig {
 		uint16_t GetPort() const;
 		const std::vector<std::string>& GetServerNames() const;
 		size_t GetClientMaxBodySize() const;
-		const std::map<uint16_t, std::string>& GetErrorPages() const;
+		const std::map<HttpStatus, std::string>& GetErrorPages() const;
 		const std::string& GetErrorPage(HttpStatus code) const;
 		const std::map<std::string, RouteConfig>& GetRoutes() const;
 		const RouteConfig& GetRoute(const std::string& path) const;

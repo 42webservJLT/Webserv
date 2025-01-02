@@ -28,7 +28,7 @@ class RouteConfig {
 
 		bool IsValid() const;
 
-		void Unmarshall(std::string& str);
+		bool Unmarshall(std::string& str);
 
 		std::string                     path;
 		std::string                     root;
