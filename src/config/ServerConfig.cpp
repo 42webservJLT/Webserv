@@ -111,17 +111,16 @@ const RouteConfig& ServerConfig::GetRoute(const std::string& path) const {
 /* ----------------------------------------------------------------------------------- */
 // Unmarshalls a string containing ONLY server config information into a ServerConfig object
 bool ServerConfig::Unmarshall(std::string& str) {
-	std::stringstream ss(str);
-
 	// vars to unmarshall into:
-	std::string host; // required, ONLY ONE
-	uint16_t port; // required, ONLY ONE
+	std::string host = DEFAULT_HOST_NAME; // required, ONLY ONE
+	uint16_t port = DEFAULT_PORT; // required, ONLY ONE
 	std::vector<std::string> serverNames; // NOT required, default to empty: ""
-	size_t clientMaxBodySize; // NOT required, default to 1MB
+	size_t clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE; // NOT required, default to 1MB
 	std::map<uint16_t, std::string> errorPages; // NOT required, default to empty
 	std::map<std::string, RouteConfig> routes; // AT LEAST ONE required
 
-	// Unmarshall
+	// unmarshall
+	std::stringstream ss(str);
 	std::string line;
 	while (std::getline(ss, line)) {
 		if (line.empty()) {
@@ -157,29 +156,23 @@ bool ServerConfig::Unmarshall(std::string& str) {
 		}
 	}
 
-	// Set the unmarshalled values
+	// validate all required fields are present
+	if (host == DEFAULT_HOST_NAME
+		|| port == DEFAULT_PORT
+		|| routes.empty()
+	) {
+		return false;
+	} else if (routes.empty()) {
+		return false;
+	}
+
+	// set the unmarshalled values
 	_host = host;
 	_port = port;
 	_serverNames = serverNames;
 	_clientMaxBodySize = clientMaxBodySize;
 	_errorPages = errorPages;
 	_routes = routes;
-
-	return true;
-}
-
-// Returns true if the server config is valid, false otherwise
-bool ServerConfig::IsValid() const {
-	// Required server fields
-	if (_host.empty() || _port == 0 || _routes.empty())
-		return false;
-		
-	// Required location fields
-	for (std::map<std::string, RouteConfig>::const_iterator it = _routes.begin();
-			it != _routes.end(); ++it) {
-		if (it->second.root.empty() || it->second.allowedMethods.empty())
-			return false;
-	}
 
 	return true;
 }

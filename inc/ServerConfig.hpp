@@ -8,9 +8,16 @@
 #include <iostream>
 #include "RouteConfig.hpp"
 
+#define DEFAULT_HOST_NAME ""
+#define DEFAULT_PORT 0
+#define DEFAULT_SERVER_NAME ""
+#define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576
+#define DEFAULT_ERROR_PAGE_PATH "" // TODO: change
+
 class ServerConfig {
 	public:
 		// Constructor & Destructor
+		ServerConfig();
 		ServerConfig(
 			const std::string& host,
 			uint16_t port,
@@ -42,7 +49,7 @@ class ServerConfig {
 		const RouteConfig& GetRoute(const std::string& path) const;
 
 		// Unmarshalling
-		void Unmarshall(std::string& str);
+		bool Unmarshall(std::string& str);
 
 //		Validation
 		bool IsValid() const;
