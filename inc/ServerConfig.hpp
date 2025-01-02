@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <map>
@@ -65,7 +67,7 @@ class ServerConfig {
 		const RouteConfig& GetRoute(const std::string& path) const;
 
 		// Unmarshalling
-		bool Unmarshall(std::string& str);
+		bool Unmarshall(std::string& str, std::ifstream& file);
 
 //		Validation
 		bool IsValid() const;
