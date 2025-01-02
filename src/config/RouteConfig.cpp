@@ -58,16 +58,12 @@ bool RouteConfig::Unmarshall(std::string& str) {
 	std::string root; // required
 	std::vector<std::string> index; // required
 	std::set<std::string> allowedMethods; // required
-	bool autoindex; // required
-	std::string redirect; // required
-	std::map<std::string, std::string> cgiExtensions; // required
-	std::string uploadDir; // required
-	size_t clientMaxBodySize; // required
+	bool autoindex = DEFAULT_AUTO_INDEX; // optional
+	std::string redirect = DEFAULT_REDIRECT; // optional
+	std::map<std::string, std::string> cgiExtensions = DEFAULT_CGI_EXTENSIONS; // optional
+	std::string uploadDir = DEFAULT_UPLOAD_DIR; // optional
+	size_t clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE; // optional
 
 	std::stringstream ss(str);
 }
 
-// Returns true if the server config is valid, false otherwise
-bool RouteConfig::IsValid() const {
-	// TODO: implement this
-}

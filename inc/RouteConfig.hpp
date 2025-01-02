@@ -8,6 +8,13 @@
 #include <iostream>
 #include "RouteConfig.hpp"
 
+#define DEFAULT_AUTO_INDEX false
+#define DEFAULT_CLIENT_MAX_BODY_SIZE 1048576
+#define DEFAULT_REDIRECT ""
+#define DEFAULT_UPLOAD_DIR ""
+// at least for php
+#define DEFAULT_CGI_EXTENSIONS std::map<std::string, std::string> { {".php", "/usr/bin/php-cgi"} }
+
 class RouteConfig {
 	public:
 		RouteConfig();
