@@ -10,7 +10,7 @@ std::string _readServerBlock(const std::string& firstLine, std::ifstream& file) 
 	size_t leftBrackets = 0;
 	size_t rightBrackets = 0;
 
-	if (firstLine.find("{") != std::string::npos) {
+	if (firstLine[firstLine.size() - 1] == '{') {
 		leftBrackets++;
 	}
 
@@ -31,6 +31,27 @@ std::string _readServerBlock(const std::string& firstLine, std::ifstream& file) 
 		}
 	}
 	return serverBlock;
+}
+
+
+// trim from start (in place)
+inline void ltrim(std::string &s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+		return !std::isspace(ch);
+	}));
+}
+
+// trim from end (in place)
+inline void rtrim(std::string &s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+		return !std::isspace(ch);
+	}).base(), s.end());
+}
+
+// trim from both ends (in place)
+inline void trim(std::string &s) {
+	ltrim(s);
+	rtrim(s);
 }
 
 /* ----------------------------------------------------------------------------------- */
@@ -67,14 +88,20 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 	std::string line;
 	while (std::getline(file, line)) {
 //		when a server is encountered, parse the server config
-		if (line.find("server") != std::string::npos) {
+		trim(line);
+		if (line.size() >= 7 && line.substr(0, 7) == "server ") {
 			std::cout << "Found server block" << std::endl;
 //			read in the server block
 			try {
 				std::string serverBlock = _readServerBlock(line, file);
 				std::cout << serverBlock << std::endl;
-//				ServerConfig config = ParseServerConfig(serverBlock);
-//				configs.push_back(config);
+
+				ServerConfig config;
+				if (!config.Unmarshall(serverBlock)) {
+					throw std::runtime_error("Error: Invalid server config");
+				}
+
+				configs.push_back(config);
 			} catch (std::exception& e) {
 				file.close();
 				throw e;
