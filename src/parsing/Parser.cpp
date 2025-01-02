@@ -5,8 +5,8 @@
 /* ----------------------------------------------------------------------------------- */
 /* Helpers                                                                             */
 /* ----------------------------------------------------------------------------------- */
-
-std::string _readServerBlock(const std::string& firstLine, std::ifstream& file) {
+// reads a server block from the file
+bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, std::ifstream& file) {
 	size_t leftBrackets = 0;
 	size_t rightBrackets = 0;
 
@@ -18,9 +18,15 @@ std::string _readServerBlock(const std::string& firstLine, std::ifstream& file) 
 	std::string line;
 	while (std::getline(file, line)) {
 		if (line.find("{") != std::string::npos) {
-			leftBrackets++;
+			++leftBrackets;
+			if (leftBrackets > 2) {
+				return false;
+			}
 		} else if (line.find("}") != std::string::npos) {
-			rightBrackets++;
+			++rightBrackets;
+			if (rightBrackets > 2) {
+				return false;
+			}
 		}
 
 		if (leftBrackets == rightBrackets) {
@@ -30,7 +36,7 @@ std::string _readServerBlock(const std::string& firstLine, std::ifstream& file) 
 			serverBlock += line + "\n";
 		}
 	}
-	return serverBlock;
+	return true;
 }
 
 
@@ -93,11 +99,14 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 			std::cout << "Found server block" << std::endl;
 //			read in the server block
 			try {
-				std::string serverBlock = _readServerBlock(line, file);
+				std::string serverBlock;
+				if (!_readServerBlock(serverBlock, line, file)) {
+					throw std::runtime_error("Error: Invalid server block");
+				}
 				std::cout << serverBlock << std::endl;
 
 				ServerConfig config;
-				if (!config.Unmarshall(serverBlock)) {
+				if (!config.Unmarshall(serverBlock, file)) {
 					throw std::runtime_error("Error: Invalid server config");
 				}
 
