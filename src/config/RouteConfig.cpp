@@ -52,9 +52,7 @@ RouteConfig::~RouteConfig() {}
 /* RouteConfig Unmarshalling                                                           */
 /* ----------------------------------------------------------------------------------- */
 // Unmarshalls a string containing ONLY route config information into a RouteConfig object
-void RouteConfig::Unmarshall(std::string& str) {
-	std::stringstream ss(str);
-
+bool RouteConfig::Unmarshall(std::string& str) {
 	// vars to unmarshall into:
 	std::string path; // required
 	std::string root; // required
@@ -65,6 +63,8 @@ void RouteConfig::Unmarshall(std::string& str) {
 	std::map<std::string, std::string> cgiExtensions; // required
 	std::string uploadDir; // required
 	size_t clientMaxBodySize; // required
+
+	std::stringstream ss(str);
 }
 
 // Returns true if the server config is valid, false otherwise
