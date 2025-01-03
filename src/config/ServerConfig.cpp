@@ -4,10 +4,10 @@ bool _lineValid(std::string& line);
 bool _handleHost(std::string& line, std::string& host);
 bool _handlePort(std::string& line, uint16_t& port);
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
-bool _handleErrorPage(std::string& line, std::map<uint16_t, std::string>& errorPages);
+bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& errorPages);
 bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
-bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes);
-bool _readRouteBlock(std::string& routeBlock, const std::string& firstLine, std::ifstream& file);
+// bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes);
+bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock);
 
 /* ----------------------------------------------------------------------------------- */
 /* ServerConfig Constructor & Destructor                                               */
@@ -152,9 +152,9 @@ bool ServerConfig::Unmarshall(std::string& str, std::ifstream& file) {
 				return false;
 			}
 		} else if (line.size() >= 9 && line.substr(0, 9) == "location ") {
-			if (!_handleLocation(line, file, routes)) {
-				return false;
-			}
+			// if (!_handleLocation(line, file, routes)) {
+			// 	return false;
+			// }
 		} else {
 			return false;
 		}
@@ -200,7 +200,7 @@ bool ServerConfig::Unmarshall(std::string& str, std::ifstream& file) {
 bool _lineValid(std::string& line) {
 	// a line is valid if ...
 	// 1. it is the server line
-	if (line.size() >= 6 && line.substr(0, 6) == "server") {
+	if (line.size() >= 7 && line.substr(0, 7) == "server ") {
 		std::stringstream ss(line);
 		std::string token;
 		std::vector<std::string> tokens;
@@ -208,9 +208,9 @@ bool _lineValid(std::string& line) {
 			tokens.push_back(token);
 		}
 
-		if (tokens.size() != 2) {
+		if (tokens.size() != 2 || std::count(tokens[1].begin(), tokens[1].end(), ';') > 1) {
 			return false;
-		} else if (tokens[1] != "{") {
+		} else if (tokens[1] == "{") {
 			return true;
 		} else {
 			return false;
@@ -220,8 +220,9 @@ bool _lineValid(std::string& line) {
 	else if (line.size() == 1 && line[0] == '}') {
 		return true;
 	}
-	// 3. it ends with ';'
-	else if (line.back() == ';') {
+	// 3. it ends with ';' & does not include '{' or '}'
+	else if (line.size() > 1 && line.back() == ';'
+		&& line.find('{') == std::string::npos && line.find('}') == std::string::npos) {
 		return true;
 	} else {
 		return false;
@@ -240,7 +241,7 @@ bool _handleHost(std::string& line, std::string& host) {
 	if (tokens.size() != 2) {
 		return false;
 	}
-	host = tokens[1];
+	host = tokens[1].substr(0, tokens[1].size() - 1);
 	return true;
 }
 
@@ -258,7 +259,7 @@ bool _handlePort(std::string& line, uint16_t& port) {
 	}
 
 	try {
-		port = std::stoi(tokens[1]);
+		port = std::stoi(tokens[1].substr(0, tokens[1].size() - 1));
 	} catch (std::exception& e) {
 		return false;
 	}
@@ -280,7 +281,11 @@ bool _handleServerName(std::string& line, std::vector<std::string>& serverNames)
 	}
 
 	for (size_t i = 1; i < tokens.size(); i++) {
-		serverNames.push_back(tokens[i]);
+		if (tokens[i].back() == ';') {
+			serverNames.push_back(tokens[i].substr(0, tokens[i].size() - 1));
+		} else {
+			serverNames.push_back(tokens[i]);
+		}
 	}
 
 	return true;
@@ -307,6 +312,9 @@ bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& erro
 	}
 
 	// assign to enum
+	if (tokens[2].back() == ';') {
+		tokens[2] = tokens[2].substr(0, tokens[2].size() - 1);
+	}
 	switch (c) {
 		case 400:
 			errorPages[HttpStatus::BAD_REQUEST] = tokens[2];
@@ -364,7 +372,7 @@ bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
 	}
 
 	try {
-		clientMaxBodySize = std::stoi(tokens[1]);
+		clientMaxBodySize = std::stoi(tokens[1].substr(0, tokens[1].size() - 1));
 	} catch (std::exception& e) {
 		return false;
 	}
@@ -372,30 +380,30 @@ bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
 	return true;
 }
 
-bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes) {
-	// split line containing location by space chars
-	std::istringstream iss(line);
-	std::vector<std::string> tokens;
-	std::string token;
-	while (std::getline(iss, token, ' ')) {
-		tokens.push_back(token);
-	}
-	if (tokens.size() != 3 || tokens[2] != "{") {
-		return false;
-	}
+// bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes) {
+// 	// split line containing location by space chars
+// 	std::istringstream iss(line);
+// 	std::vector<std::string> tokens;
+// 	std::string token;
+// 	while (std::getline(iss, token, ' ')) {
+// 		tokens.push_back(token);
+// 	}
+// 	if (tokens.size() != 3 || tokens[2] != "{") {
+// 		return false;
+// 	}
 
-	std::string routeBlock;
-	if (!_readRouteBlock(routeBlock, line, file)) {
-		return false;
-	}
+// 	std::string routeBlock;
+// 	if (!_readRouteBlock(line, file, routeBlock)) {
+// 		return false;
+// 	}
 
-	RouteConfig route;
-	if (!route.Unmarshall(line)) {
-		return false;
-	}
+// 	RouteConfig route;
+// 	if (!route.Unmarshall(line)) {
+// 		return false;
+// 	}
 
-	return true;
-}
+// 	return true;
+// }
 
 // reads a server block from the file
 bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock) {
@@ -406,7 +414,7 @@ bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::str
 		leftBrackets++;
 	}
 
-	std::string routeBlock = firstLine + "\n";
+	routeBlock = firstLine + "\n";
 	std::string line;
 	while (std::getline(file, line)) {
 		if (line.find("{") != std::string::npos) {

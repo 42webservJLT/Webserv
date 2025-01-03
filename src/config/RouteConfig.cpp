@@ -7,7 +7,7 @@ bool _handleAutoindex(std::string& line, bool& autoindex);
 bool _handleRedirect(std::string& line, std::string& redirect);
 bool _handleCgiExtensions(std::string& line, std::map<std::string, std::string>& cgiExtensions);
 bool _handleUploadDir(std::string& line, std::string& uploadDir);
-bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
+bool _handleRouteClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
 
 /* ----------------------------------------------------------------------------------- */
 /* RouteConfig Constructor & Destructor                                                */
@@ -111,7 +111,7 @@ bool RouteConfig::Unmarshall(std::string& str) {
 				return false;
 			}
 		} else if (line.size() >= 19 && line.substr(0, 19) == "client_max_body_size ") {
-			if (!_handleClientMaxBodySize(line, clientMaxBodySize)) {
+			if (!_handleRouteClientMaxBodySize(line, clientMaxBodySize)) {
 				return false;
 			}
 		} else {
@@ -245,7 +245,7 @@ bool _handleUploadDir(std::string& line, std::string& uploadDir) {
 }
 
 // handles the client_max_body_size line
-bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
+bool _handleRouteClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
 	// split line containing client_max_body_size by space chars
 	std::istringstream iss(line);
 	std::vector<std::string> tokens;

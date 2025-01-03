@@ -14,7 +14,7 @@ bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, st
 		++leftBrackets;
 	}
 
-	std::string serverBlock = firstLine + "\n";
+	serverBlock = firstLine + "\n";
 	std::string line;
 	while (std::getline(file, line)) {
 		if (line.find("{") != std::string::npos) {
