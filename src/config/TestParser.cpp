@@ -27,19 +27,6 @@ bool test_lineValid() {
 			}
 		}
 
-		// technically valid, but errors when checked by _handle... functions
-		std::string l7 = "server_name localhost; server_name localhost;";
-		std::string l8 = "server_name localhost; server_name localhost; server_name localhost;";
-		std::vector<std::string> technicallyValids;
-		technicallyValids.push_back("server_name localhost; server_name localhost;");
-		technicallyValids.push_back("server_name localhost; server_name localhost; server_name localhost;");
-		for (std::string& line : technicallyValids) {
-			if (!_lineValid(line)) {
-				std::cout << "Failed on technically valid line: " << line << std::endl;
-				return false;
-			}
-		}
-
 		// invalids
 		std::vector<std::string> invalids;
 		invalids.push_back("server");
@@ -47,6 +34,9 @@ bool test_lineValid() {
 		invalids.push_back("};");
 		invalids.push_back("port 8080");
 		invalids.push_back(";");
+		invalids.push_back("server_name localhost; server_name localhost;");
+		invalids.push_back("server_name localhost; server_name localhost; server_name localhost;");
+		invalids.push_back("server_name localhost");
 		for (std::string& line : invalids) {
 			if (_lineValid(line)) {
 				std::cout << "Failed on invalid line: " << line << std::endl;
@@ -117,7 +107,7 @@ bool test_handleServerName() {
 	try {
 		std::string valid = "server_name localhost;";
 		std::string valid2 = "server_name localhost www.lzipp.de www.lzipp.com;";
-		std::string invalid = "server_name localhost; host localhost;";
+		std::string invalid = "server_name;";
 		std::vector<std::string> serverNames;
 		if (!_handleServerName(valid, serverNames)) {
 			std::cout << "Failed on valid line: " << valid << std::endl;
@@ -194,8 +184,7 @@ bool test_handleClientMaxBodySize() {
 		std::string valid = "client_max_body_size 1333;";
 		std::string valid2 = "client_max_body_size 200000;";
 		std::string invalid = "client_max_body_size 1MB;";
-		std::string invalid2 = "client_max_body_size 100; host localhost;";
-		std::string invalid3 = "client_max_body_size abcdef;";
+		std::string invalid2 = "client_max_body_size abcdef;";
 		size_t clientMaxBodySize;
 		if (!_handleClientMaxBodySize(valid, clientMaxBodySize)) {
 			std::cout << "Failed on valid line: " << valid << std::endl;
@@ -221,10 +210,6 @@ bool test_handleClientMaxBodySize() {
 		}
 		if (_handleClientMaxBodySize(invalid2, clientMaxBodySize)) {
 			std::cout << "Failed on invalid line: " << invalid2 << std::endl;
-			return false;
-		}
-		if (_handleClientMaxBodySize(invalid3, clientMaxBodySize)) {
-			std::cout << "Failed on invalid line: " << invalid3 << std::endl;
 			return false;
 		}
 	} catch (std::exception& e) {

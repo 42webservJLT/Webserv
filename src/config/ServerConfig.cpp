@@ -208,7 +208,7 @@ bool _lineValid(std::string& line) {
 			tokens.push_back(token);
 		}
 
-		if (tokens.size() != 2 || std::count(tokens[1].begin(), tokens[1].end(), ';') > 1) {
+		if (tokens.size() != 2) {
 			return false;
 		} else if (tokens[1] == "{") {
 			return true;
@@ -219,6 +219,8 @@ bool _lineValid(std::string& line) {
 	// 2. it is the last line of the server block
 	else if (line.size() == 1 && line[0] == '}') {
 		return true;
+	} else if (std::count(line.begin(), line.end(), ';') > 1) {
+		return false;
 	}
 	// 3. it ends with ';' & does not include '{' or '}'
 	else if (line.size() > 1 && line.back() == ';'
@@ -273,7 +275,9 @@ bool _handleServerName(std::string& line, std::vector<std::string>& serverNames)
 	std::istringstream iss(line);
 	std::vector<std::string> tokens;
 	std::string token;
+	// std::cout << "---------\n";
 	while (std::getline(iss, token, ' ')) {
+		// std::cout << "token: " << token << std::endl;
 		tokens.push_back(token);
 	}
 	if (tokens.size() == 1) {
@@ -372,7 +376,11 @@ bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
 	}
 
 	try {
-		clientMaxBodySize = std::stoi(tokens[1].substr(0, tokens[1].size() - 1));
+		tokens[1] = tokens[1].substr(0, tokens[1].size() - 1);
+		if (!std::all_of(tokens[1].begin(), tokens[1].end(), ::isdigit)) {
+			return false;
+		}
+		clientMaxBodySize = std::stoi(tokens[1]);
 	} catch (std::exception& e) {
 		return false;
 	}
