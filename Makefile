@@ -29,10 +29,13 @@ lint:
 	find ./inc -type f -name "*.hpp" -exec cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude {} \;
 
 tserv:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/test_ServerConfig.cpp -o ParserTest
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/test_ServerConfig.cpp -o ServerTest
 
 troute:
 	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/test_RouteConfig.cpp -o RouteTest
+
+tparser:
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/test_Parser.cpp -o ParserTest
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	mkdir -p $(OBJDIR)

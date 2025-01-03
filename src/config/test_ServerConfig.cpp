@@ -227,12 +227,6 @@ bool test_handleLocation() {
 
 // @formatter:on
 int main(void) {
-	// std::string path = "/Users/lzipp/Desktop/Webserv/config/webserv.conf";
-	// std::cout << "Parsing config file: " << path << std::endl;
-	// Parser parser(path);
-
-	// std::vector<ServerConfig> configs = parser.ParseConfig();
-
 	int exitCode = 0;
 
 	if (!test_lineValid()) {
