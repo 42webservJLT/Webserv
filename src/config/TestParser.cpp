@@ -220,7 +220,10 @@ bool test_handleClientMaxBodySize() {
 	return true;
 }
 
-
+// TODO: Implement test_handleLocation
+bool test_handleLocation() {
+	return true;
+}
 
 // @formatter:on
 int main(void) {
@@ -254,6 +257,10 @@ int main(void) {
 	} 
 	if (!test_handleClientMaxBodySize()) {
 		std::cout << "Failed test_handleClientMaxBodySize" << std::endl;
+		exitCode = 1;
+	}
+	if (!test_handleLocation()) {
+		std::cout << "Failed test_handleLocation" << std::endl;
 		exitCode = 1;
 	}
 
