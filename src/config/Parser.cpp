@@ -2,43 +2,7 @@
 
 // @formatter:on
 
-/* ----------------------------------------------------------------------------------- */
-/* Helpers                                                                             */
-/* ----------------------------------------------------------------------------------- */
-// reads a server block from the file
-bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, std::ifstream& file) {
-	size_t leftBrackets = 0;
-	size_t rightBrackets = 0;
-
-	if (firstLine[firstLine.size() - 1] == '{') {
-		++leftBrackets;
-	}
-
-	serverBlock = firstLine + "\n";
-	std::string line;
-	while (std::getline(file, line)) {
-		if (line.find("{") != std::string::npos) {
-			++leftBrackets;
-			if (leftBrackets > 2) {
-				return false;
-			}
-		} else if (line.find("}") != std::string::npos) {
-			++rightBrackets;
-			if (rightBrackets > 2) {
-				return false;
-			}
-		}
-
-		if (leftBrackets == rightBrackets) {
-			serverBlock += line;
-			break;
-		} else {
-			serverBlock += line + "\n";
-		}
-	}
-	return true;
-}
-
+bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, std::ifstream& file);
 
 // trim from start (in place)
 inline void ltrim(std::string &s) {
@@ -122,4 +86,41 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 	file.close();
 
 	return configs;
+}
+
+/* ----------------------------------------------------------------------------------- */
+/* Helpers                                                                             */
+/* ----------------------------------------------------------------------------------- */
+// reads a server block from the file
+bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, std::ifstream& file) {
+	size_t leftBrackets = 0;
+	size_t rightBrackets = 0;
+
+	if (firstLine[firstLine.size() - 1] == '{') {
+		++leftBrackets;
+	}
+
+	serverBlock = firstLine + "\n";
+	std::string line;
+	while (std::getline(file, line)) {
+		if (line.find("{") != std::string::npos) {
+			++leftBrackets;
+			if (leftBrackets > 2) {
+				return false;
+			}
+		} else if (line.find("}") != std::string::npos) {
+			++rightBrackets;
+			if (rightBrackets > 2) {
+				return false;
+			}
+		}
+
+		if (leftBrackets == rightBrackets) {
+			serverBlock += line;
+			break;
+		} else {
+			serverBlock += line + "\n";
+		}
+	}
+	return true;
 }

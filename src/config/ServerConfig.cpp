@@ -410,6 +410,8 @@ bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::strin
 		return false;
 	}
 
+	routes[tokens[1]] = route;
+
 	return true;
 }
 
