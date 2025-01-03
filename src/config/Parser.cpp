@@ -11,7 +11,7 @@ bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, st
 	size_t rightBrackets = 0;
 
 	if (firstLine[firstLine.size() - 1] == '{') {
-		leftBrackets++;
+		++leftBrackets;
 	}
 
 	std::string serverBlock = firstLine + "\n";
