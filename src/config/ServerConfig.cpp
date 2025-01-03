@@ -6,7 +6,7 @@ bool _handlePort(std::string& line, uint16_t& port);
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
 bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& errorPages);
 bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
-// bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes);
+bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes);
 bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock);
 
 /* ----------------------------------------------------------------------------------- */
@@ -152,9 +152,9 @@ bool ServerConfig::Unmarshall(std::string& str, std::ifstream& file) {
 				return false;
 			}
 		} else if (line.size() >= 9 && line.substr(0, 9) == "location ") {
-			// if (!_handleLocation(line, file, routes)) {
-			// 	return false;
-			// }
+			if (!_handleLocation(line, file, routes)) {
+				return false;
+			}
 		} else {
 			return false;
 		}
@@ -388,30 +388,30 @@ bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
 	return true;
 }
 
-// bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes) {
-// 	// split line containing location by space chars
-// 	std::istringstream iss(line);
-// 	std::vector<std::string> tokens;
-// 	std::string token;
-// 	while (std::getline(iss, token, ' ')) {
-// 		tokens.push_back(token);
-// 	}
-// 	if (tokens.size() != 3 || tokens[2] != "{") {
-// 		return false;
-// 	}
+bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes) {
+	// split line containing location by space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 3 || tokens[2] != "{") {
+		return false;
+	}
 
-// 	std::string routeBlock;
-// 	if (!_readRouteBlock(line, file, routeBlock)) {
-// 		return false;
-// 	}
+	std::string routeBlock;
+	if (!_readRouteBlock(line, file, routeBlock)) {
+		return false;
+	}
 
-// 	RouteConfig route;
-// 	if (!route.Unmarshall(line)) {
-// 		return false;
-// 	}
+	RouteConfig route;
+	if (!route.Unmarshall(line)) {
+		return false;
+	}
 
-// 	return true;
-// }
+	return true;
+}
 
 // reads a server block from the file
 bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock) {

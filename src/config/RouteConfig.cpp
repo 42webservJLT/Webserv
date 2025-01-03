@@ -125,12 +125,21 @@ bool RouteConfig::Unmarshall(std::string& str) {
 	}
 
 	// check if all required fields were set
-	if (root.empty() || index.empty() || allowedMethods.empty()) {
+	if (path_.empty() || root_.empty() || index_.empty() || allowedMethods_.empty()) {
 		return false;
 	}
 
 	// set the unmarshalled values
-	path = root;
+	path = path_;
+	root = root_;
+	index = index_;
+	allowedMethods = allowedMethods_;
+	autoindex = autoindex_;
+	redirect = redirect_;
+	cgiExtensions = cgiExtensions_;
+	uploadDir = uploadDir_;
+	clientMaxBodySize = clientMaxBodySize_;
+
 	return true;
 }
 
