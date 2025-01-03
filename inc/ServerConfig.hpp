@@ -8,6 +8,7 @@
 #include <set>
 #include <sstream>
 #include <iostream>
+#include "helpers.hpp"
 #include "HTTPStatus.hpp"
 #include "RouteConfig.hpp"
 

@@ -6,6 +6,7 @@
 #include <set>
 #include <sstream>
 #include <iostream>
+#include "helpers.hpp"
 #include "RouteConfig.hpp"
 
 #define DEFAULT_AUTO_INDEX false

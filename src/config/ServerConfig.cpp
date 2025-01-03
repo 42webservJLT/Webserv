@@ -128,35 +128,40 @@ bool ServerConfig::Unmarshall(std::string& str, std::ifstream& file) {
 		if (line.empty()) {
 			continue;
 		} else if (!_lineValid(line)) {
+			std::cout << "Invalid line 1: " << line << std::endl;
 			return false;
 		}
 		
 		if (line.size() >= 5 && line.substr(0, 5) == "host ") {
 			if (!_handleHost(line, host)) {
+				std::cout << "Invalid host" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 5 && line.substr(0, 5) == "port ") {
 			if (!_handlePort(line, port)) {
+				std::cout << "Invalid port" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 12 && line.substr(0, 12) == "server_name ") {
 			if (!_handleServerName(line, serverNames)) {
+				std::cout << "Invalid server_name" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 20 && line.substr(0, 20) == "client_max_body_size ") {
 			if (!_handleClientMaxBodySize(line, clientMaxBodySize)) {
+				std::cout << "Invalid client_max_body_size" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 11 && line.substr(0, 11) == "error_page ") {
 			if (!_handleErrorPage(line, errorPages)) {
+				std::cout << "Invalid error_page" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 9 && line.substr(0, 9) == "location ") {
 			if (!_handleLocation(line, file, routes)) {
+				std::cout << "Invalid location" << std::endl;
 				return false;
 			}
-		} else {
-			return false;
 		}
 	}
 
@@ -165,6 +170,7 @@ bool ServerConfig::Unmarshall(std::string& str, std::ifstream& file) {
 		|| port == DEFAULT_PORT
 		|| routes.empty()
 	) {
+		std::cout << "Invalid server config" << std::endl;
 		return false;
 	} else if (serverNames.empty()) {
 		serverNames.push_back(DEFAULT_SERVER_NAME);
@@ -209,8 +215,25 @@ bool _lineValid(std::string& line) {
 		}
 
 		if (tokens.size() != 2) {
+			// std::cout << "Invalid server line" << std::endl;
 			return false;
 		} else if (tokens[1] == "{") {
+			return true;
+		} else {
+			// std::cout << "Invalid server line 2" << std::endl;
+			return false;
+		}
+	} else if (line.size() >= 9 && line.substr(0, 9) == "location ") {
+		std::stringstream ss(line);
+		std::string token;
+		std::vector<std::string> tokens;
+		while (std::getline(ss, token, ' ')) {
+			tokens.push_back(token);
+		}
+
+		if (tokens.size() != 3) {
+			return false;
+		} else if (tokens[2] == "{") {
 			return true;
 		} else {
 			return false;
@@ -220,6 +243,7 @@ bool _lineValid(std::string& line) {
 	else if (line.size() == 1 && line[0] == '}') {
 		return true;
 	} else if (std::count(line.begin(), line.end(), ';') > 1) {
+		// std::cout << "Invalid line 3" << std::endl;
 		return false;
 	}
 	// 3. it ends with ';' & does not include '{' or '}'
@@ -227,6 +251,7 @@ bool _lineValid(std::string& line) {
 		&& line.find('{') == std::string::npos && line.find('}') == std::string::npos) {
 		return true;
 	} else {
+		// std::cout << "Invalid line 4" << std::endl;
 		return false;
 	}
 }
@@ -402,11 +427,13 @@ bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::strin
 
 	std::string routeBlock;
 	if (!_readRouteBlock(line, file, routeBlock)) {
+		std::cout << "Error: Invalid route block" << std::endl;
 		return false;
 	}
 
 	RouteConfig route;
 	if (!route.Unmarshall(line)) {
+		std::cout << "Error: Invalid route config" << std::endl;
 		return false;
 	}
 
@@ -416,28 +443,64 @@ bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::strin
 }
 
 // reads a server block from the file
+// bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock) {
+// 	size_t leftBrackets = 0;
+// 	size_t rightBrackets = 0;
+
+// 	if (firstLine.back() == '{') {
+// 		std::cout << "triggered line" << std::endl;
+// 		++leftBrackets;
+// 	}
+
+// 	routeBlock = firstLine + "\n";
+// 	std::string line;
+// 	while (std::getline(file, line)) {
+// 		std::cout << "route line: " << line << std::endl;
+// 		trim(line);
+// 		if (line.find("{") != std::string::npos) {
+// 			std::cout << "found { in line |" << line << "|" << std::endl;
+// 			++leftBrackets;
+// 		} else if (line.find("}") != std::string::npos) {
+// 			++rightBrackets;
+// 		}
+
+// 		std::cout << "left: " << leftBrackets << " right: " << rightBrackets << std::endl;
+
+// 		if (leftBrackets == rightBrackets) {
+// 			routeBlock += line;
+// 			break;
+// 		} else {
+// 			routeBlock += line + "\n";
+// 		}
+// 	}
+
+// 	std::cout << "Route block: " << routeBlock << std::endl;
+// 	return true;
+// }
+
+// reads a route block from sthe server string
 bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock) {
 	size_t leftBrackets = 0;
 	size_t rightBrackets = 0;
 
-	if (firstLine[firstLine.size() - 1] == '{') {
-		leftBrackets++;
+	if (firstLine.back() == '{') {
+		std::cout << "triggered line" << std::endl;
+		++leftBrackets;
 	}
 
 	routeBlock = firstLine + "\n";
 	std::string line;
 	while (std::getline(file, line)) {
+		std::cout << "route line: " << line << std::endl;
+		trim(line);
 		if (line.find("{") != std::string::npos) {
+			std::cout << "found { in line |" << line << "|" << std::endl;
 			++leftBrackets;
-			if (leftBrackets > 1) {
-				return false;
-			}
 		} else if (line.find("}") != std::string::npos) {
 			++rightBrackets;
-			if (rightBrackets > 1) {
-				return false;
-			}
 		}
+
+		std::cout << "left: " << leftBrackets << " right: " << rightBrackets << std::endl;
 
 		if (leftBrackets == rightBrackets) {
 			routeBlock += line;
@@ -446,5 +509,7 @@ bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::str
 			routeBlock += line + "\n";
 		}
 	}
+
+	std::cout << "Route block: " << routeBlock << std::endl;
 	return true;
 }

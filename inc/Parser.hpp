@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "helpers.hpp"
 #include "HTTPStatus.hpp"
 #include "ServerConfig.hpp"
 

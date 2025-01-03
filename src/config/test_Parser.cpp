@@ -13,6 +13,7 @@ int main(void) {
 		return 1;
 	}
 
+	std::cout << "Number of server configs: " << configs.size() << std::endl;
 	if (configs.size() != 2) {
 		std::cerr << "Error: No server configs found" << std::endl;
 		return 1;

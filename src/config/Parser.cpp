@@ -4,26 +4,6 @@
 
 bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, std::ifstream& file);
 
-// trim from start (in place)
-inline void ltrim(std::string &s) {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-		return !std::isspace(ch);
-	}));
-}
-
-// trim from end (in place)
-inline void rtrim(std::string &s) {
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-		return !std::isspace(ch);
-	}).base(), s.end());
-}
-
-// trim from both ends (in place)
-inline void trim(std::string &s) {
-	ltrim(s);
-	rtrim(s);
-}
-
 /* ----------------------------------------------------------------------------------- */
 /* Parser Constructor & Destructor                                                     */
 /* ----------------------------------------------------------------------------------- */
@@ -60,21 +40,22 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 //		when a server is encountered, parse the server config
 		trim(line);
 		if (line.size() >= 7 && line.substr(0, 7) == "server ") {
-			std::cout << "Found server block" << std::endl;
+			// std::cout << "Found server block" << std::endl;
 //			read in the server block
 			try {
-				std::cout << "Reading server block" << std::endl;
+				// std::cout << "Reading server block" << std::endl;
 				std::string serverBlock;
 				if (!_readServerBlock(serverBlock, line, file)) {
-					std::cout << "Error: Invalid server block" << std::endl;
 					throw std::runtime_error("Error: Invalid server block");
 				}
-				std::cout << serverBlock << std::endl;
+				// std::cout << serverBlock << std::endl;
 
-				// ServerConfig config;
-				// if (!config.Unmarshall(serverBlock, file)) {
-				// 	throw std::runtime_error("Error: Invalid server config");
-				// }
+				ServerConfig config;
+				if (!config.Unmarshall(serverBlock, file)) {
+					std::cout << "Error: Invalid server config" << std::endl;
+					throw std::runtime_error("Error: Invalid server config");
+				}
+				configs.push_back(config);
 
 				// configs.push_back(config);
 			} catch (std::exception& e) {
@@ -105,6 +86,7 @@ bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, st
 	serverBlock = firstLine + "\n";
 	std::string line;
 	while (std::getline(file, line)) {
+		trim(line);
 		if (line.find("{") != std::string::npos) {
 			++leftBrackets;
 		} else if (line.find("}") != std::string::npos) {
@@ -118,5 +100,7 @@ bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, st
 			serverBlock += line + "\n";
 		}
 	}
+
+	std::cout << "Server block: " << serverBlock << std::endl;
 	return true;
 }
