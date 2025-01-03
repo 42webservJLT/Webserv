@@ -1,5 +1,6 @@
 #include "RouteConfig.hpp"
 
+bool _handlePath(std::string& line, std::string& path);
 bool _handleRoot(std::string& line, std::string& root);
 bool _handleIndex(std::string& line, std::vector<std::string>& index);
 bool _handleAllowedMethods(std::string& line, std::set<std::string>& allowedMethods);
@@ -63,15 +64,15 @@ RouteConfig::~RouteConfig() {}
 // Unmarshalls a string containing ONLY route config information into a RouteConfig object
 bool RouteConfig::Unmarshall(std::string& str) {
 	// vars to unmarshall into:
-	std::string path; // required
-	std::string root; // required
-	std::vector<std::string> index; // required
-	std::set<std::string> allowedMethods; // required
-	bool autoindex = DEFAULT_AUTO_INDEX; // optional
-	std::string redirect = DEFAULT_REDIRECT; // optional
-	std::map<std::string, std::string> cgiExtensions = DEFAULT_CGI_EXTENSIONS; // optional
-	std::string uploadDir = DEFAULT_UPLOAD_DIR; // optional
-	size_t clientMaxBodySize = DEFAULT_CLIENT_MAX_BODY_SIZE; // optional
+	std::string path_; // required
+	std::string root_; // required
+	std::vector<std::string> index_; // required
+	std::set<std::string> allowedMethods_; // required
+	bool autoindex_ = DEFAULT_AUTO_INDEX; // optional
+	std::string redirect_ = DEFAULT_REDIRECT; // optional
+	std::map<std::string, std::string> cgiExtensions_ = DEFAULT_CGI_EXTENSIONS; // optional
+	std::string uploadDir_ = DEFAULT_UPLOAD_DIR; // optional
+	size_t clientMaxBodySize_ = DEFAULT_CLIENT_MAX_BODY_SIZE; // optional
 
 	std::stringstream ss(str);
 	std::string line;
@@ -82,8 +83,12 @@ bool RouteConfig::Unmarshall(std::string& str) {
 			break;
 		}
 
-		if (line.size() >= 5 && line.substr(0, 5) == "root ") {
-			if (!_handleRoot(line, root)) {
+		if (line.size() >= 9 && line.substr(0, 9) == "location ") {
+			if (!_handlePath(line, path_)) {
+				return false;
+			}
+		} else if (line.size() >= 5 && line.substr(0, 5) == "root ") {
+			if (!_handleRoot(line, root_)) {
 				return false;
 			}
 		} else if (line.size() >= 6 && line.substr(0, 6) == "index ") {
@@ -118,6 +123,32 @@ bool RouteConfig::Unmarshall(std::string& str) {
 			return false;
 		}
 	}
+
+	// check if all required fields were set
+	if (root.empty() || index.empty() || allowedMethods.empty()) {
+		return false;
+	}
+
+	// set the unmarshalled values
+	path = root;
+	return true;
+}
+
+bool _handlePath(std::string& line, std::string& path) {
+	// split line containing location path by space chars
+	std::istringstream iss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, ' ')) {
+		tokens.push_back(token);
+	}
+	if (tokens.size() != 3 || tokens[2] != "{") {
+		return false;
+	} else if (tokens[1].size() == 0 || tokens[1][0] != '/') {
+		return false;
+	}
+	path = tokens[1];
+	return true;
 }
 
 // handles the root line
@@ -132,7 +163,7 @@ bool _handleRoot(std::string& line, std::string& root) {
 	if (tokens.size() != 2) {
 		return false;
 	}
-	root = tokens[1];
+	root = tokens[1].substr(0, tokens[1].size() - 1);
 	return true;
 }
 
@@ -149,7 +180,11 @@ bool _handleIndex(std::string& line, std::vector<std::string>& index) {
 		return false;
 	}
 	for (size_t i = 1; i < tokens.size(); i++) {
-		index.push_back(tokens[i]);
+		if (tokens[i].back() == ';') {
+			index.push_back(tokens[i].substr(0, tokens[i].size() - 1));
+		} else {
+			index.push_back(tokens[i]);
+		}
 	}
 	return true;
 }
@@ -167,7 +202,11 @@ bool _handleAllowedMethods(std::string& line, std::set<std::string>& allowedMeth
 		return false;
 	}
 	for (size_t i = 1; i < tokens.size(); i++) {
-		allowedMethods.insert(tokens[i]);
+		if (tokens[i].back() == ';') {
+			allowedMethods.insert(tokens[i].substr(0, tokens[i].size() - 1));
+		} else {
+			allowedMethods.insert(tokens[i]);
+		}
 	}
 	return true;
 }
@@ -183,6 +222,10 @@ bool _handleAutoindex(std::string& line, bool& autoindex) {
 	}
 	if (tokens.size() != 2) {
 		return false;
+	}
+
+	if (tokens[1].back() == ';') {
+		tokens[1] = tokens[1].substr(0, tokens[1].size() - 1);
 	}
 	if (tokens[1] == "on") {
 		autoindex = true;
@@ -206,7 +249,7 @@ bool _handleRedirect(std::string& line, std::string& redirect) {
 	if (tokens.size() != 2) {
 		return false;
 	}
-	redirect = tokens[1];
+	redirect = tokens[1].substr(0, tokens[1].size() - 1);
 	return true;
 }
 
@@ -219,12 +262,10 @@ bool _handleCgiExtensions(std::string& line, std::map<std::string, std::string>&
 	while (std::getline(iss, token, ' ')) {
 		tokens.push_back(token);
 	}
-	if (tokens.size() < 3 || tokens.size() % 2 != 1) {
+	if (tokens.size() != 3) {
 		return false;
 	}
-	for (size_t i = 1; i < tokens.size(); i += 2) {
-		cgiExtensions[tokens[i]] = tokens[i + 1];
-	}
+	cgiExtensions[tokens[1]] = tokens[2].substr(0, tokens[2].size() - 1);
 	return true;
 }
 
@@ -240,7 +281,7 @@ bool _handleUploadDir(std::string& line, std::string& uploadDir) {
 	if (tokens.size() != 2) {
 		return false;
 	}
-	uploadDir = tokens[1];
+	uploadDir = tokens[1].substr(0, tokens[1].size() - 1);
 	return true;
 }
 
@@ -258,6 +299,11 @@ bool _handleRouteClientMaxBodySize(std::string& line, size_t& clientMaxBodySize)
 	}
 
 	try {
+		if (tokens[1].back() == ';') {
+			tokens[1] = tokens[1].substr(0, tokens[1].size() - 1);
+		} if (!std::all_of(tokens[1].begin(), tokens[1].end(), ::isdigit)) {
+			return false;
+		}
 		clientMaxBodySize = std::stoi(tokens[1]);
 	} catch (std::exception& e) {
 		return false;
