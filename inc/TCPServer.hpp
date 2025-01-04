@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ServerConfig.hpp"
+
 class TCPServer {
 	public:
 		// Constructor & Destructor
@@ -14,4 +16,9 @@ class TCPServer {
 
 	private:
 //		TODO: Add members
+		void StartServer();
+
+//		variables
+		ServerConfig& _config;
+
 };

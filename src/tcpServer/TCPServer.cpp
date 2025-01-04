@@ -1,5 +1,8 @@
 #include "TCPServer.hpp"
 
+/* ----------------------------------------------------------------------------------- */
+/* TCPServer Constructor & Destructor                                                  */
+/* ----------------------------------------------------------------------------------- */
 TCPServer::TCPServer() {}
 
 TCPServer::TCPServer(const TCPServer& other) {
@@ -11,3 +14,8 @@ TCPServer& TCPServer::operator=(const TCPServer& other) {
 }
 
 TCPServer::~TCPServer() {}
+
+/* ----------------------------------------------------------------------------------- */
+/* TCPServer Start                                                                     */
+/* ----------------------------------------------------------------------------------- */
+TCPServer::StartServer() {}
