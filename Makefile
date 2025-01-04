@@ -28,17 +28,22 @@ lint:
 	cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude ./src
 	find ./inc -type f -name "*.hpp" -exec cppcheck --error-exitcode=1 --enable=all --suppress=missingInclude {} \;
 
+tall: tserv troute tparser
+
 tserv:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/test_ServerConfig.cpp -o ServerTest
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/test_ServerConfig.cpp -o ServerTest \
+	&& ./ServerTest
 
 troute:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/test_RouteConfig.cpp -o RouteTest
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/test_RouteConfig.cpp -o RouteTest \
+	&& ./RouteTest
 
 tparser:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/test_Parser.cpp -o ParserTest
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/test_Parser.cpp -o ParserTest \
+	&& ./ParserTest
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	mkdir -p $(OBJDIR)
 	$(CPP) $(CPPFLAGS) -c $< -o $@
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re lint tall tserv troute tparser

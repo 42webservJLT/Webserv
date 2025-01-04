@@ -33,6 +33,7 @@
 **/webserv
 **/ParserTest
 **/RouteTest
+**/ServerTest
 
 # Others
 **/.idea
