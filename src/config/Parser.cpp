@@ -42,7 +42,6 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 		if (line.size() >= 7 && line.substr(0, 7) == "server ") {
 //			read in the server block
 			try {
-				// std::cout << "Reading server block" << std::endl;
 				std::string serverBlock;
 				if (!_readServerBlock(serverBlock, line, file)) {
 					throw std::runtime_error("Error: Invalid server block");
@@ -98,6 +97,5 @@ bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, st
 		}
 	}
 
-	// std::cout << "Server block: " << serverBlock << std::endl;
 	return true;
 }

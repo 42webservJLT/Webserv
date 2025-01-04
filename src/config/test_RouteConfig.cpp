@@ -279,6 +279,98 @@ bool test_handleRouteClientMaxBodySize() {
 	return true;
 }
 
+bool test_Unmarshal() {
+	std::string valid = "location / {\n"
+		"root /var/www/html;\n"
+		"index index.html;\n"
+		"allowed_methods GET POST;\n"
+		"autoindex on;\n"
+		"redirect /redirected;\n"
+		"cgi_extension .php /usr/bin/php-cgi;\n"
+		"upload_dir /var/www/html/uploads;\n"
+		"client_max_body_size 1333;\n"
+		"}\n";
+	std::string valid2 = "location /abcd {\n"
+		"root /var/www/html;\n"
+		"index index.html;\n"
+		"allowed_methods GET POST;\n"
+		"autoindex on;\n"
+		"redirect /redirected;\n"
+		"cgi_extension .php /usr/bin/php-cgi;\n"
+		"upload_dir /var/www/html/uploads;\n"
+		"client_max_body_size 1333;\n"
+		"}";
+	std::string invalid = "location /abcd {\n"
+		"index index.html;\n"
+		"allowed_methods GET POST;\n"
+		"autoindex on;\n"
+		"redirect /redirected;\n"
+		"cgi_extension .php /usr/bin/php-cgi;\n"
+		"upload_dir /var/www/html/uploads;\n"
+		"client_max_body_size 1333;\n"
+		"}";
+	std::string invalid2 = "location /abcd {\n"
+		"root /var/www/html;\n"
+		"allowed_methods GET POST;\n"
+		"autoindex on;\n"
+		"redirect /redirected;\n"
+		"cgi_extension .php /usr/bin/php-cgi;\n"
+		"upload_dir /var/www/html/uploads;\n"
+		"client_max_body_size 1333;\n"
+		"}";
+	std::string invalid3 = "location / {\n"
+		"root /var/www/html;\n"
+		"index index.html;\n"
+		"autoindex on;\n"
+		"redirect /redirected;\n"
+		"cgi_extension .php /usr/bin/php-cgi;\n"
+		"upload_dir /var/www/html/uploads;\n"
+		"client_max_body_size 1333;\n"
+		"}\n";
+
+	{
+		RouteConfig route;
+		if (!route.Unmarshall(valid)) {
+			std::cout << "Failed on valid line: " << valid << std::endl;
+			return false;
+		}
+	}
+
+	{
+		RouteConfig route;
+		if (!route.Unmarshall(valid2)) {
+			std::cout << "Failed on valid line: " << valid2 << std::endl;
+			return false;
+		}
+	}
+
+	{
+		RouteConfig route;
+		if (route.Unmarshall(invalid)) {
+			std::cout << "Failed on invalid line: " << invalid << std::endl;
+			return false;
+		}
+	}
+
+	{
+		RouteConfig route;
+		if (route.Unmarshall(invalid2)) {
+			std::cout << "Failed on invalid line: " << invalid2 << std::endl;
+			return false;
+		}
+	}
+
+	{
+		RouteConfig route;
+		if (route.Unmarshall(invalid3)) {
+			std::cout << "Failed on invalid line: " << invalid3 << std::endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
 int main(void) {
 	if (!test_handleRoot()) {
 		std::cout << "Failed on test_handleRoot" << std::endl;
@@ -310,6 +402,10 @@ int main(void) {
 	}
 	if (!test_handleRouteClientMaxBodySize()) {
 		std::cout << "Failed on test_handleRouteClientMaxBodySize" << std::endl;
+		return 1;
+	}
+	if (!test_Unmarshal()) {
+		std::cout << "Failed on test_Unmarshal" << std::endl;
 		return 1;
 	}
 

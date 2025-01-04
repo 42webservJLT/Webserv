@@ -85,47 +85,38 @@ bool RouteConfig::Unmarshall(std::string& str) {
 
 		if (line.size() >= 9 && line.substr(0, 9) == "location ") {
 			if (!_handlePath(line, path_)) {
-				std::cout << "Error: Invalid line path" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 5 && line.substr(0, 5) == "root ") {
 			if (!_handleRoot(line, root_)) {
-				std::cout << "Error: Invalid line root" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 6 && line.substr(0, 6) == "index ") {
 			if (!_handleIndex(line, index_)) {
-				std::cout << "Error: Invalid line index" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 16 && line.substr(0, 16) == "allowed_methods ") {
 			if (!_handleAllowedMethods(line, allowedMethods_)) {
-				std::cout << "Error: Invalid line allowed methods" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 10 && line.substr(0, 10) == "autoindex ") {
 			if (!_handleAutoindex(line, autoindex_)) {
-				std::cout << "Error: Invalid line autoindex" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 9 && line.substr(0, 9) == "redirect ") {
 			if (!_handleRedirect(line, redirect_)) {
-				std::cout << "Error: Invalid line redirect" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 13 && line.substr(0, 13) == "cgi_extension ") {
 			if (!_handleCgiExtensions(line, cgiExtensions_)) {
-				std::cout << "Error: Invalid line cgi extension" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 11 && line.substr(0, 11) == "upload_dir ") {
 			if (!_handleUploadDir(line, uploadDir_)) {
-				std::cout << "Error: Invalid line upload dir" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 19 && line.substr(0, 19) == "client_max_body_size ") {
 			if (!_handleRouteClientMaxBodySize(line, clientMaxBodySize_)) {
-				std::cout << "Error: Invalid line max body" << std::endl;
 				return false;
 			}
 		}
@@ -133,11 +124,6 @@ bool RouteConfig::Unmarshall(std::string& str) {
 
 	// check if all required fields were set
 	if (path_.empty() || root_.empty() || index_.empty() || allowedMethods_.empty()) {
-		std::cout << "Error: Required field not set a" << std::endl;
-		std::cout << "path: |" << path_ << "|" << std::endl;
-		std::cout << "root: |" << root_ <<"|" <<  std::endl;
-		std::cout << "index: |" << index_.size() << "|" << std::endl;
-		std::cout << "allowedMethods: |" << allowedMethods_.size() << "|" << std::endl;
 		return false;
 	}
 

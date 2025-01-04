@@ -128,38 +128,31 @@ bool ServerConfig::Unmarshall(std::string& str) {
 		if (line.empty()) {
 			continue;
 		} else if (!_lineValid(line)) {
-			std::cout << "Invalid line 1: " << line << std::endl;
 			return false;
 		}
 		
 		if (line.size() >= 5 && line.substr(0, 5) == "host ") {
 			if (!_handleHost(line, host)) {
-				std::cout << "Invalid host" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 5 && line.substr(0, 5) == "port ") {
 			if (!_handlePort(line, port)) {
-				std::cout << "Invalid port" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 12 && line.substr(0, 12) == "server_name ") {
 			if (!_handleServerName(line, serverNames)) {
-				std::cout << "Invalid server_name" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 20 && line.substr(0, 20) == "client_max_body_size ") {
 			if (!_handleClientMaxBodySize(line, clientMaxBodySize)) {
-				std::cout << "Invalid client_max_body_size" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 11 && line.substr(0, 11) == "error_page ") {
 			if (!_handleErrorPage(line, errorPages)) {
-				std::cout << "Invalid error_page" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 9 && line.substr(0, 9) == "location ") {
 			if (!_handleLocation(line, ss, routes)) {
-				std::cout << "Invalid location" << std::endl;
 				return false;
 			}
 		}
@@ -170,7 +163,6 @@ bool ServerConfig::Unmarshall(std::string& str) {
 		|| port == DEFAULT_PORT
 		|| routes.empty()
 	) {
-		std::cout << "Invalid server config" << std::endl;
 		return false;
 	} else if (serverNames.empty()) {
 		serverNames.push_back(DEFAULT_SERVER_NAME);
@@ -241,7 +233,6 @@ bool _lineValid(std::string& line) {
 	else if (line.size() == 1 && line[0] == '}') {
 		return true;
 	} else if (std::count(line.begin(), line.end(), ';') > 1) {
-		// std::cout << "Invalid line 3" << std::endl;
 		return false;
 	}
 	// 3. it ends with ';' & does not include '{' or '}'
@@ -297,9 +288,7 @@ bool _handleServerName(std::string& line, std::vector<std::string>& serverNames)
 	std::istringstream iss(line);
 	std::vector<std::string> tokens;
 	std::string token;
-	// std::cout << "---------\n";
 	while (std::getline(iss, token, ' ')) {
-		// std::cout << "token: " << token << std::endl;
 		tokens.push_back(token);
 	}
 	if (tokens.size() == 1) {
@@ -424,13 +413,11 @@ bool _handleLocation(std::string& line, std::stringstream& serverBlock, std::map
 
 	std::string routeBlock;
 	if (!_readRouteBlock(line, serverBlock, routeBlock)) {
-		std::cout << "Error: Invalid route block" << std::endl;
 		return false;
 	}
 
 	RouteConfig route;
 	if (!route.Unmarshall(routeBlock)) {
-		std::cout << "Error: Invalid route config" << std::endl;
 		return false;
 	}
 
