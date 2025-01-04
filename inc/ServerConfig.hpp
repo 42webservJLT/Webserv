@@ -68,7 +68,7 @@ class ServerConfig {
 		const RouteConfig& GetRoute(const std::string& path) const;
 
 		// Unmarshalling
-		bool Unmarshall(std::string& str, std::ifstream& file);
+		bool Unmarshall(std::string& str);
 
 //		Validation
 		bool IsValid() const;

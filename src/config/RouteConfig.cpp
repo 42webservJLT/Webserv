@@ -74,19 +74,15 @@ bool RouteConfig::Unmarshall(std::string& str) {
 	std::string uploadDir_ = DEFAULT_UPLOAD_DIR; // optional
 	size_t clientMaxBodySize_ = DEFAULT_CLIENT_MAX_BODY_SIZE; // optional
 
-	std::cout << "str: " << str << std::endl;
-
 	std::stringstream ss(str);
 	std::string line;
 	while (std::getline(ss, line)) {
 		if (line.empty()) {
 			continue;
 		} else if (line == "}") {
-			std::cout << "Error: Invalid line }" << std::endl;
 			break;
 		}
 
-		std::cout << "line: " << line << std::endl;
 		if (line.size() >= 9 && line.substr(0, 9) == "location ") {
 			if (!_handlePath(line, path_)) {
 				std::cout << "Error: Invalid line path" << std::endl;
@@ -98,43 +94,40 @@ bool RouteConfig::Unmarshall(std::string& str) {
 				return false;
 			}
 		} else if (line.size() >= 6 && line.substr(0, 6) == "index ") {
-			if (!_handleIndex(line, index)) {
+			if (!_handleIndex(line, index_)) {
 				std::cout << "Error: Invalid line index" << std::endl;
 				return false;
 			}
-		} else if (line.size() >= 15 && line.substr(0, 15) == "allowed_methods ") {
-			if (!_handleAllowedMethods(line, allowedMethods)) {
+		} else if (line.size() >= 16 && line.substr(0, 16) == "allowed_methods ") {
+			if (!_handleAllowedMethods(line, allowedMethods_)) {
 				std::cout << "Error: Invalid line allowed methods" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 10 && line.substr(0, 10) == "autoindex ") {
-			if (!_handleAutoindex(line, autoindex)) {
+			if (!_handleAutoindex(line, autoindex_)) {
 				std::cout << "Error: Invalid line autoindex" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 9 && line.substr(0, 9) == "redirect ") {
-			if (!_handleRedirect(line, redirect)) {
+			if (!_handleRedirect(line, redirect_)) {
 				std::cout << "Error: Invalid line redirect" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 13 && line.substr(0, 13) == "cgi_extension ") {
-			if (!_handleCgiExtensions(line, cgiExtensions)) {
+			if (!_handleCgiExtensions(line, cgiExtensions_)) {
 				std::cout << "Error: Invalid line cgi extension" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 11 && line.substr(0, 11) == "upload_dir ") {
-			if (!_handleUploadDir(line, uploadDir)) {
+			if (!_handleUploadDir(line, uploadDir_)) {
 				std::cout << "Error: Invalid line upload dir" << std::endl;
 				return false;
 			}
 		} else if (line.size() >= 19 && line.substr(0, 19) == "client_max_body_size ") {
-			if (!_handleRouteClientMaxBodySize(line, clientMaxBodySize)) {
+			if (!_handleRouteClientMaxBodySize(line, clientMaxBodySize_)) {
 				std::cout << "Error: Invalid line max body" << std::endl;
 				return false;
 			}
-		} else {
-			std::cout << "Error: Invalid line dijcidsjcjdsciojosd" << std::endl;
-			return false;
 		}
 	}
 
@@ -168,7 +161,6 @@ bool _handlePath(std::string& line, std::string& path) {
 	std::vector<std::string> tokens;
 	std::string token;
 	while (std::getline(iss, token, ' ')) {
-		std::cout << "token: " << token << std::endl;
 		tokens.push_back(token);
 	}
 	if (tokens.size() != 3 || tokens[2] != "{") {
@@ -186,9 +178,7 @@ bool _handleRoot(std::string& line, std::string& root) {
 	std::istringstream iss(line);
 	std::vector<std::string> tokens;
 	std::string token;
-	std::cout << "triggered" << std::endl;
 	while (std::getline(iss, token, ' ')) {
-		std::cout << "token: " << token << std::endl;
 		tokens.push_back(token);
 	}
 	if (tokens.size() != 2) {
@@ -239,6 +229,7 @@ bool _handleAllowedMethods(std::string& line, std::set<std::string>& allowedMeth
 			allowedMethods.insert(tokens[i]);
 		}
 	}
+
 	return true;
 }
 

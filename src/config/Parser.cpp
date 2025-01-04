@@ -40,7 +40,6 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 //		when a server is encountered, parse the server config
 		trim(line);
 		if (line.size() >= 7 && line.substr(0, 7) == "server ") {
-			// std::cout << "Found server block" << std::endl;
 //			read in the server block
 			try {
 				// std::cout << "Reading server block" << std::endl;
@@ -48,11 +47,9 @@ std::vector<ServerConfig> Parser::ParseConfig() {
 				if (!_readServerBlock(serverBlock, line, file)) {
 					throw std::runtime_error("Error: Invalid server block");
 				}
-				// std::cout << serverBlock << std::endl;
 
 				ServerConfig config;
-				if (!config.Unmarshall(serverBlock, file)) {
-					std::cout << "Error: Invalid server config" << std::endl;
+				if (!config.Unmarshall(serverBlock)) {
 					throw std::runtime_error("Error: Invalid server config");
 				}
 				configs.push_back(config);
@@ -101,6 +98,6 @@ bool _readServerBlock(std::string& serverBlock, const std::string& firstLine, st
 		}
 	}
 
-	std::cout << "Server block: " << serverBlock << std::endl;
+	// std::cout << "Server block: " << serverBlock << std::endl;
 	return true;
 }

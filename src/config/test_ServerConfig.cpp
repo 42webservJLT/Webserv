@@ -7,8 +7,8 @@ bool _handlePort(std::string& line, uint16_t& port);
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
 bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& errorPages);
 bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
-bool _handleLocation(std::string& line, std::ifstream& file, std::map<std::string, RouteConfig>& routes);
-bool _readRouteBlock(const std::string& firstLine, std::ifstream& file, std::string& routeBlock);
+bool _handleLocation(std::string& line, std::stringstream& serverBlock, std::map<std::string, RouteConfig>& routes);
+bool _readRouteBlock(std::string& firstLine, std::stringstream& serverBlock, std::string& routeBlock);
 
 bool test_lineValid() {
 	try {
