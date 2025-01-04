@@ -6,7 +6,7 @@ TESTFLAGS := -Wextra -Wall -std=c++17 -I./inc
 
 SRCDIR := ./src
 SRC += $(addprefix $(SRCDIR)/config/, ServerConfig.cpp RouteConfig.cpp Parser.cpp)
-SRC := $(addprefix $(SRCDIR)/, main.cpp)
+SRC := $(addprefix $(SRCDIR)/, helpers.cpp main.cpp)
 
 OBJDIR = ./obj
 OBJ := $(addprefix $(OBJDIR)/, $(notdir $(SRC:.cpp=.o)))
@@ -31,15 +31,15 @@ lint:
 tall: tserv troute tparser
 
 tserv:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/test_ServerConfig.cpp -o ServerTest \
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/helpers.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp tests/config/test_ServerConfig.cpp -o ServerTest \
 	&& ./ServerTest
 
 troute:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/test_RouteConfig.cpp -o RouteTest \
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp tests/config/test_RouteConfig.cpp -o RouteTest \
 	&& ./RouteTest
 
 tparser:
-	$(CPP) $(TESTFLAGS) $(SRCDIR)/config/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/Parser.cpp $(SRCDIR)/config/test_Parser.cpp -o ParserTest \
+	$(CPP) $(TESTFLAGS) $(SRCDIR)/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/Parser.cpp tests/config/test_Parser.cpp -o ParserTest \
 	&& ./ParserTest
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
