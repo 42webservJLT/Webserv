@@ -1,38 +1,28 @@
 //
-// Created by Leon David Zipp on 1/4/25.
+// Created by Leon David Zipp on 1/6/25.
 //
 
 #pragma once
 
-#include <sys/socket.h>
-#include <poll.h>
-#include <netdb.h>
-#include <cstring>
-#include <iostream>
-#include <fcntl.h>
-#include <unistd.h>
-#include "ServerConfig.hpp"
+#include <vector>
+#include "TCPSubServer.hpp"
 
+//a manager for multiple (sub)servers
 class TCPServer {
 	public:
-		// Constructor & Destructor
-		TCPServer(ServerConfig& config);
+		TCPServer(std::vector<TCPSubServer&> servers);
 		TCPServer(const TCPServer& other);
 		TCPServer& operator=(const TCPServer& other);
 		~TCPServer();
 
+//		starts all servers
 		int Setup();
-		ServerConfig& GetConfig() const;
-		int& GetSocket() const;
-		std::vector<pollfd>& GetPollFds() const;
+		int Start();
+		TCPSubServer& TCPServer::GetResponsibleServer(int clientSocket);
 
 	private:
-//		TCPServer();
-
-//		variables
-		ServerConfig& _config;
-		int _socket;
+		std::vector<TCPSubServer&> _servers;
 		std::vector<pollfd> _pollFds;
-
-		void _handleClient(int clientSocket);
+		std::vector<int> _sockets;
 };
+
