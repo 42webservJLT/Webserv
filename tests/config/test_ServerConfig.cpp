@@ -6,7 +6,7 @@ bool _handleHost(std::string& line, std::string& host);
 bool _handlePort(std::string& line, uint16_t& port);
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
 bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& errorPages);
-bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
+bool _HandleRequestMaxBodySize(std::string& line, size_t& clientMaxBodySize);
 bool _handleLocation(std::string& line, std::stringstream& serverBlock, std::map<std::string, RouteConfig>& routes);
 bool _readRouteBlock(std::string& firstLine, std::stringstream& serverBlock, std::string& routeBlock);
 
@@ -179,14 +179,14 @@ bool test_handleErrorPage() {
 	return true;
 }
 
-bool test_handleClientMaxBodySize() {
+bool test_HandleRequestMaxBodySize() {
 	try {
 		std::string valid = "client_max_body_size 1333;";
 		std::string valid2 = "client_max_body_size 200000;";
 		std::string invalid = "client_max_body_size 1MB;";
 		std::string invalid2 = "client_max_body_size abcdef;";
 		size_t clientMaxBodySize;
-		if (!_handleClientMaxBodySize(valid, clientMaxBodySize)) {
+		if (!_HandleRequestMaxBodySize(valid, clientMaxBodySize)) {
 			std::cout << "Failed on valid line: " << valid << std::endl;
 			return false;
 		}
@@ -195,7 +195,7 @@ bool test_handleClientMaxBodySize() {
 			return false;
 		}
 
-		if (!_handleClientMaxBodySize(valid2, clientMaxBodySize)) {
+		if (!_HandleRequestMaxBodySize(valid2, clientMaxBodySize)) {
 			std::cout << "Failed on valid line: " << valid2 << std::endl;
 			return false;
 		}
@@ -204,11 +204,11 @@ bool test_handleClientMaxBodySize() {
 			return false;
 		}
 
-		if (_handleClientMaxBodySize(invalid, clientMaxBodySize)) {
+		if (_HandleRequestMaxBodySize(invalid, clientMaxBodySize)) {
 			std::cout << "Failed on invalid line: " << invalid << std::endl;
 			return false;
 		}
-		if (_handleClientMaxBodySize(invalid2, clientMaxBodySize)) {
+		if (_HandleRequestMaxBodySize(invalid2, clientMaxBodySize)) {
 			std::cout << "Failed on invalid line: " << invalid2 << std::endl;
 			return false;
 		}
@@ -249,8 +249,8 @@ int main(void) {
 		std::cout << "Failed test_handleErrorPage" << std::endl;
 		exitCode = 1;
 	} 
-	if (!test_handleClientMaxBodySize()) {
-		std::cout << "Failed test_handleClientMaxBodySize" << std::endl;
+	if (!test_HandleRequestMaxBodySize()) {
+		std::cout << "Failed test_HandleRequestMaxBodySize" << std::endl;
 		exitCode = 1;
 	}
 	if (!test_handleLocation()) {
