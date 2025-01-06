@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <sys/socket.h>
 #include "ServerConfig.hpp"
 
 class TCPServer {
@@ -14,11 +15,12 @@ class TCPServer {
 		TCPServer& operator=(const TCPServer& other);
 		~TCPServer();
 
-	private:
-//		TODO: Add members
-		void StartServer();
+		int StartServer();
 
+	private:
 //		variables
 		ServerConfig& _config;
+		int _socket;
+		std::vector<pollfd> _pollFds;
 
 };
