@@ -75,37 +75,36 @@ int TCPServer::StartServer() {
 		return 1;
 	}
 
-	// initialize fd_set
-	fd_set masterSet, readSet;
-	FD_ZERO(&masterSet);
-	FD_SET(_socket, &masterSet);
-	int maxFd = _socket;
+	// initialize pollfd vector
+	_pollFds.push_back({ _socket, POLLIN, 0 });
+
+//	announce server start
+	std::cout << "Server started on " << _config.GetHost() << ":" << _config.GetPort() << std::endl;
 
 	// start accepting connections
 	while (true) {
-		readSet = masterSet;
-		int selectCount = select(maxFd + 1, &readSet, nullptr, nullptr, nullptr);
-		if (selectCount < 0) {
-			std::cerr << "Select failed" << std::endl;
+		int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
+		if (pollCount < 0) {
+			std::cerr << "Poll failed" << std::endl;
 			close(_socket);
 			return 1;
 		}
 
-		for (int fd = 0; fd <= maxFd; ++fd) {
-			if (FD_ISSET(fd, &readSet)) {
-				if (fd == _socket) {
+		for (auto it = _pollFds.begin(); it != _pollFds.end(); ++it) {
+			if (it->revents & POLLIN) {
+				if (it->fd == _socket) {
 					int clientSocket = accept(_socket, nullptr, nullptr);
 					if (clientSocket >= 0) {
 						fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-						FD_SET(clientSocket, &masterSet);
-						if (clientSocket > maxFd) {
-							maxFd = clientSocket;
-						}
+						_pollFds.push_back({ clientSocket, POLLIN, 0 });
 					}
 				} else {
-					_handleClient(fd);
-					close(fd);
-					FD_CLR(fd, &masterSet);
+					_handleClient(it->fd);
+					close(it->fd);
+					it = _pollFds.erase(it);
+					if (it == _pollFds.end()) {
+						break;
+					}
 				}
 			}
 		}
@@ -121,7 +120,9 @@ void TCPServer::_handleClient(int clientSocket) {
 	std::memset(buffer, 0, sizeof(buffer));
 	ssize_t bytesRead = read(clientSocket, buffer, sizeof(buffer) - 1);
 	if (bytesRead > 0) {
-//		TODO: handle request
+		std::cout << "Received: " << buffer << std::endl;
+//		std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
+//		write(clientSocket, response.c_str(), response.size());
 	} else if (bytesRead == 0) {
 		std::cout << "Client disconnected" << std::endl;
 	} else {
