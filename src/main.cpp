@@ -1,5 +1,5 @@
 #include "main.hpp"
-// [...]
+
 
 int main(int argc, char **argv) {
 	if (argc != 2) {
@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
 	}
 
 	Parser parser(argv[1]);
-	std::vector<ServerConfig> serverConfigs = parser.ParseConfigs();
+	std::vector<ServerConfig> serverConfigs = parser.ParseConfig();
 	std::vector<TCPServer> servers;
 	for (ServerConfig& serverConfig : serverConfigs) {
 		TCPServer server(serverConfig);
