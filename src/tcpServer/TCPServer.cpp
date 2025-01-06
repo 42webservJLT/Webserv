@@ -26,6 +26,7 @@ TCPServer::~TCPServer() {
 /* ----------------------------------------------------------------------------------- */
 /* TCPServer Start                                                                     */
 /* ----------------------------------------------------------------------------------- */
+// starts the server: creates a socket, binds it, listens on it, and accepts connections indefinitely
 int TCPServer::StartServer() {
 //	open socket
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -52,12 +53,13 @@ int TCPServer::StartServer() {
 	}
 
 //	start listening
-	if (listen(m_socket, SOMAXCONN) < 0) {
+	if (listen(_socket, SOMAXCONN) < 0) {
 		std::cerr << "Listen failed" << std::endl;
+		close(_socket);
 		return 1;
 	}
 
-//	add socket to pollfds
+//	add socket to pollFds
 	pollfd pfd;
 	pfd.fd = _socket;
 	pfd.events = POLLIN;
@@ -65,32 +67,47 @@ int TCPServer::StartServer() {
 
 //	start accepting connections
 	while (true) {
-		int pollCount = poll(m_fds.data(), m_fds.size(), -1);
+		int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
 		if (pollCount < 0) {
 			std::cerr << "Poll failed" << std::endl;
+			close(_socket);
 			return 1;
 		}
 
-		for (size_t i = 0; i < m_fds.size(); ++i) {
-			if (m_fds[i].revents & POLLIN) {
-				if (m_fds[i].fd == m_socket) {
-					int clientSocket = accept(m_socket, nullptr, nullptr);
+		for (size_t i = 0; i < _pollFds.size(); ++i) {
+			if (_pollFds[i].revents & POLLIN) {
+				if (_pollFds[i].fd == _socket) {
+					int clientSocket = accept(_socket, nullptr, nullptr);
 					if (clientSocket >= 0) {
 						setNonBlocking(clientSocket);
 						pollfd clientFd;
 						clientFd.fd = clientSocket;
 						clientFd.events = POLLIN;
-						m_fds.push_back(clientFd);
+						_pollFds.push_back(clientFd);
 					}
 				} else {
-					handleClient(m_fds[i].fd);
-					close(m_fds[i].fd);
-					m_fds.erase(m_fds.begin() + i);
+					handleClient(_pollFds[i].fd);
+					close(_pollFds[i].fd);
+					_pollFds.erase(_pollFds.begin() + i);
 					--i;
 				}
 			}
 		}
 	}
 
+	close(_socket);
 	return 0;
+}
+
+void TCPServer::_handleClient(int clientSocket) {
+	char buffer[_config.GetClientMaxBodySize()];
+	std::memset(buffer, 0, sizeof(buffer));
+	ssize_t bytesRead = read(clientSocket, buffer, sizeof(buffer) - 1);
+	if (bytesRead > 0) {
+//		TODO: handle request
+	} else if (bytesRead == 0) {
+		std::cout << "Client disconnected" << std::endl;
+	} else {
+		std::cerr << "Error: Failed to read from client" << std::endl;
+	}
 }

@@ -6,7 +6,8 @@ TESTFLAGS := -Wextra -Wall -std=c++17 -I./inc
 
 SRCDIR := ./src
 SRC += $(addprefix $(SRCDIR)/config/, ServerConfig.cpp RouteConfig.cpp Parser.cpp)
-SRC := $(addprefix $(SRCDIR)/, helpers.cpp main.cpp)
+SRC += $(addprefix $(SRCDIR)/tcpServer/, TCPServer.cpp)
+SRC += $(addprefix $(SRCDIR)/, helpers.cpp main.cpp)
 
 OBJDIR = ./obj
 OBJ := $(addprefix $(OBJDIR)/, $(notdir $(SRC:.cpp=.o)))

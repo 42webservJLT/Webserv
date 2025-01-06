@@ -23,4 +23,6 @@ class TCPServer {
 		int _socket;
 		std::vector<pollfd> _pollFds;
 
+		void _handleClient(int clientSocket)
+
 };
