@@ -9,10 +9,10 @@ int main(int argc, char **argv) {
 
 	Parser parser(argv[1]);
 	std::vector<ServerConfig> serverConfigs = parser.ParseConfig();
-	std::vector<TCPServer> servers;
+	std::vector<TCPSubServer> servers;
 	for (ServerConfig& serverConfig : serverConfigs) {
-		TCPServer server(serverConfig);
-		server.StartServer();
+		TCPSubServer server(serverConfig);
+		server.Setup()
 		servers.push_back(server);
 	}
 
