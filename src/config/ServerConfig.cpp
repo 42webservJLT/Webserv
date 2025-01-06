@@ -5,7 +5,7 @@ bool _handleHost(std::string& line, std::string& host);
 bool _handlePort(std::string& line, uint16_t& port);
 bool _handleServerName(std::string& line, std::vector<std::string>& serverNames);
 bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& errorPages);
-bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
+bool _HandleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize);
 bool _handleLocation(std::string& line, std::stringstream& serverBlock, std::map<std::string, RouteConfig>& routes);
 bool _readRouteBlock(std::string& firstLine, std::stringstream& serverBlock, std::string& routeBlock);
 
@@ -144,7 +144,7 @@ bool ServerConfig::Unmarshall(std::string& str) {
 				return false;
 			}
 		} else if (line.size() >= 20 && line.substr(0, 20) == "client_max_body_size ") {
-			if (!_handleClientMaxBodySize(line, clientMaxBodySize)) {
+			if (!_HandleClientMaxBodySize(line, clientMaxBodySize)) {
 				return false;
 			}
 		} else if (line.size() >= 11 && line.substr(0, 11) == "error_page ") {
@@ -374,7 +374,7 @@ bool _handleErrorPage(std::string& line, std::map<HttpStatus, std::string>& erro
 	return true;
 }
 
-bool _handleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
+bool _HandleClientMaxBodySize(std::string& line, size_t& clientMaxBodySize) {
 	// split line containing client_max_body_size by space chars
 	std::istringstream iss(line);
 	std::vector<std::string> tokens;
