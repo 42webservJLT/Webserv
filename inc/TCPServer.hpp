@@ -16,7 +16,7 @@
 class TCPServer {
 	public:
 		// Constructor & Destructor
-		TCPServer();
+		TCPServer(ServerConfig& config);
 		TCPServer(const TCPServer& other);
 		TCPServer& operator=(const TCPServer& other);
 		~TCPServer();
@@ -24,6 +24,8 @@ class TCPServer {
 		int StartServer();
 
 	private:
+		TCPServer();
+
 //		variables
 		ServerConfig& _config;
 		int _socket;

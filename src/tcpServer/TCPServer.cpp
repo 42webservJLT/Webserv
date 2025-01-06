@@ -5,6 +5,8 @@
 /* ----------------------------------------------------------------------------------- */
 TCPServer::TCPServer() _socket(-1) {}
 
+TCPServer::TCPServer(ServerConfig& config) : _config(config), _socket(-1) {}
+
 TCPServer::TCPServer(const TCPServer& other) {
 	*this = other;
 }

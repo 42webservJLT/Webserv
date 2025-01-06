@@ -2,13 +2,21 @@
 // [...]
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        std::cerr << "usage: ./webserv [config file]" << std::endl;
-        return 1;
-    }
+	if (argc != 2) {
+		std::cerr << "usage: ./webserv [config file]" << std::endl;
+		return 1;
+	}
 
-    (void)argv;
+	Parser parser(argv[1]);
+	std::vector<ServerConfig> serverConfigs = parser.ParseConfigs();
+	std::vector<TCPServer> servers;
+	for (ServerConfig& serverConfig : serverConfigs) {
+		TCPServer server(serverConfig);
+		server.StartServer();
+		servers.push_back(server);
+	}
 
-    std::cout << "Hello webserv" << std::endl;
-    // [...]
+	// [...]
+
+	return 0;
 }
