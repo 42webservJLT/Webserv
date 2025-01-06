@@ -5,12 +5,21 @@ CPPFLAGS := -Wextra -Wall -Werror -std=c++17 -I./inc
 TESTFLAGS := -Wextra -Wall -std=c++17 -I./inc
 
 SRCDIR := ./src
-SRC += $(addprefix $(SRCDIR)/config/, ServerConfig.cpp RouteConfig.cpp Parser.cpp)
-SRC += $(addprefix $(SRCDIR)/tcpServer/, TCPServer.cpp)
+OBJDIR = ./obj
+
+CONFIGDIR = config
+TCPSERVERDIR = tcpServer
+
+SRC := $(addprefix $(SRCDIR)/$(CONFIGDIR)/, ServerConfig.cpp RouteConfig.cpp Parser.cpp)
+SRC += $(addprefix $(SRCDIR)/$(TCPSERVERDIR)/, TCPServer.cpp)
 SRC += $(addprefix $(SRCDIR)/, helpers.cpp main.cpp)
 
-OBJDIR = ./obj
-OBJ := $(addprefix $(OBJDIR)/, $(notdir $(SRC:.cpp=.o)))
+OBJ := $(SRC:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	mkdir -p $(OBJDIR)/$(CONFIGDIR)
+	mkdir -p $(OBJDIR)/$(TCPSERVERDIR)
+	$(CPP) $(CPPFLAGS) -c $< -o $@
 
 all: $(NAME)
 
@@ -42,9 +51,5 @@ troute:
 tparser:
 	$(CPP) $(TESTFLAGS) $(SRCDIR)/helpers.cpp $(SRCDIR)/config/RouteConfig.cpp $(SRCDIR)/config/ServerConfig.cpp $(SRCDIR)/config/Parser.cpp tests/config/test_Parser.cpp -o ParserTest \
 	&& ./ParserTest
-
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	mkdir -p $(OBJDIR)
-	$(CPP) $(CPPFLAGS) -c $< -o $@
 
 .PHONY: all clean fclean re lint tall tserv troute tparser
