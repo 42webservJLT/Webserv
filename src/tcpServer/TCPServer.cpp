@@ -3,11 +3,11 @@
 /* ----------------------------------------------------------------------------------- */
 /* TCPServer Constructor & Destructor                                                  */
 /* ----------------------------------------------------------------------------------- */
-TCPServer::TCPServer() _socket(-1) {}
+//TCPServer::TCPServer() : _socket(-1) {}
 
 TCPServer::TCPServer(ServerConfig& config) : _config(config), _socket(-1) {}
 
-TCPServer::TCPServer(const TCPServer& other) {
+TCPServer::TCPServer(const TCPServer& other) : _config(other._config), _socket(other._socket), _pollFds(other._pollFds) {
 	*this = other;
 }
 
@@ -17,6 +17,8 @@ TCPServer& TCPServer::operator=(const TCPServer& other) {
 		_socket = other._socket;
 		_pollFds = other._pollFds;
 	}
+
+	return *this;
 }
 
 TCPServer::~TCPServer() {

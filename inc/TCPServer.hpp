@@ -5,7 +5,7 @@
 #pragma once
 
 #include <sys/socket.h>
-#include <sys/select.h>
+#include <poll.h>
 #include <netdb.h>
 #include <cstring>
 #include <iostream>
@@ -24,13 +24,12 @@ class TCPServer {
 		int StartServer();
 
 	private:
-		TCPServer();
+//		TCPServer();
 
 //		variables
 		ServerConfig& _config;
 		int _socket;
 		std::vector<pollfd> _pollFds;
 
-		void _handleClient(int clientSocket)
-
+		void _handleClient(int clientSocket);
 };
