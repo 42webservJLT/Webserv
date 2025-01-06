@@ -21,7 +21,10 @@ class TCPServer {
 		TCPServer& operator=(const TCPServer& other);
 		~TCPServer();
 
-		int StartServer();
+		int Setup();
+		ServerConfig& GetConfig() const;
+		int& GetSocket() const;
+		std::vector<pollfd>& GetPollFds() const;
 
 	private:
 //		TCPServer();

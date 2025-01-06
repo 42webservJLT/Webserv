@@ -28,10 +28,25 @@ TCPServer::~TCPServer() {
 }
 
 /* ----------------------------------------------------------------------------------- */
+/* TCPServer Getters                                                                  */
+/* ----------------------------------------------------------------------------------- */
+ServerConfig& TCPServer::GetConfig() const {
+	return _config;
+}
+
+int& TCPServer::GetSocket() const {
+	return _socket;
+}
+
+std::vector<pollfd>& TCPServer::GetPollFds() const {
+	return _pollFds;
+}
+
+/* ----------------------------------------------------------------------------------- */
 /* TCPServer Start                                                                     */
 /* ----------------------------------------------------------------------------------- */
 // starts the server: creates a socket, binds it, listens on it, and accepts connections indefinitely
-int TCPServer::StartServer() {
+int TCPServer::Setup() {
 	// open socket
 	_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socket == -1) {
@@ -82,33 +97,33 @@ int TCPServer::StartServer() {
 	std::cout << "Server started on " << _config.GetHost() << ":" << _config.GetPort() << std::endl;
 
 	// start accepting connections
-	while (true) {
-		int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
-		if (pollCount < 0) {
-			std::cerr << "Poll failed" << std::endl;
-			close(_socket);
-			return 1;
-		}
-
-		for (auto it = _pollFds.begin(); it != _pollFds.end(); ++it) {
-			if (it->revents & POLLIN) {
-				if (it->fd == _socket) {
-					int clientSocket = accept(_socket, nullptr, nullptr);
-					if (clientSocket >= 0) {
-						fcntl(clientSocket, F_SETFL, O_NONBLOCK);
-						_pollFds.push_back({ clientSocket, POLLIN, 0 });
-					}
-				} else {
-					_handleClient(it->fd);
-					close(it->fd);
-					it = _pollFds.erase(it);
-					if (it == _pollFds.end()) {
-						break;
-					}
-				}
-			}
-		}
-	}
+//	while (true) {
+//		int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);
+//		if (pollCount < 0) {
+//			std::cerr << "Poll failed" << std::endl;
+//			close(_socket);
+//			return 1;
+//		}
+//
+//		for (auto it = _pollFds.begin(); it != _pollFds.end(); ++it) {
+//			if (it->revents & POLLIN) {
+//				if (it->fd == _socket) {
+//					int clientSocket = accept(_socket, nullptr, nullptr);
+//					if (clientSocket >= 0) {
+//						fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+//						_pollFds.push_back({ clientSocket, POLLIN, 0 });
+//					}
+//				} else {
+//					_handleClient(it->fd);
+//					close(it->fd);
+//					it = _pollFds.erase(it);
+//					if (it == _pollFds.end()) {
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	close(_socket);
 	return 0;
