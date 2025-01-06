@@ -5,6 +5,12 @@
 #pragma once
 
 #include <sys/socket.h>
+#include <sys/select.h>
+#include <netdb.h>
+#include <cstring>
+#include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
 #include "ServerConfig.hpp"
 
 class TCPServer {
