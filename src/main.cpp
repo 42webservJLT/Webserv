@@ -8,13 +8,15 @@ int main(int argc, char **argv) {
 	}
 
 	Parser parser(argv[1]);
-	std::vector<ServerConfig> serverConfigs = parser.ParseConfig();
+	auto serverConfigs = parser.ParseConfig();
 	std::vector<TCPSubServer> servers;
 	for (ServerConfig& serverConfig : serverConfigs) {
 		TCPSubServer server(serverConfig);
-		server.Setup()
 		servers.push_back(server);
 	}
+
+	TCPServer tcpServer(servers);
+	tcpServer.Setup();
 
 	// [...]
 

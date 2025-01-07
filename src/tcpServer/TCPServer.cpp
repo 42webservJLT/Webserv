@@ -73,14 +73,17 @@ int TCPServer::Setup() {
 
 		// initialize pollfd vector
 		_pollFds.push_back({ _socket, POLLIN, 0 });
+		_socketToServer[_socket] = server;
+
+		std::cout << "Server started on " << server.GetConfig().GetHost() << ":" << server.GetConfig().GetPort() << std::endl;
 	}
 
 	return 0;
 }
 
 int TCPServer::Start() {
-	while (True) {
-		for (server : _servers) {
+	while (true) {
+		for (auto& server : _servers) {
 			auto _pollFds = server.GetPollFds();
 			auto _socket = server.GetSocket();
 			int pollCount = poll(_pollFds.data(), _pollFds.size(), -1);

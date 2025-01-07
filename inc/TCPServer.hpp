@@ -7,7 +7,7 @@
 #include <vector>
 #include "TCPSubServer.hpp"
 
-//a manager for multiple (sub)servers
+// holds all subserver instances
 class TCPServer {
 	public:
 		TCPServer(std::vector<TCPSubServer&> servers);
@@ -21,8 +21,11 @@ class TCPServer {
 		TCPSubServer& TCPServer::GetResponsibleServer(int clientSocket);
 
 	private:
+//		first server is fallback server
 		std::vector<TCPSubServer&> _servers;
+//		1 pollfd per server
 		std::vector<pollfd> _pollFds;
-		std::vector<int> _sockets;
+//		1 socket per client
+		std::map<int, TCPSubServer&> _socketToServer;
 };
 

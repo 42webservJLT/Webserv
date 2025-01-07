@@ -33,5 +33,4 @@ class TCPSubServer {
 
 //		variables
 		ServerConfig& _config;
-		pollfd _pollFd;
 };

@@ -11,7 +11,7 @@ CONFIGDIR = config
 TCPSERVERDIR = tcpServer
 
 SRC := $(addprefix $(SRCDIR)/$(CONFIGDIR)/, ServerConfig.cpp RouteConfig.cpp Parser.cpp)
-SRC += $(addprefix $(SRCDIR)/$(TCPSERVERDIR)/, TCPSubServer.cpp)
+SRC += $(addprefix $(SRCDIR)/$(TCPSERVERDIR)/, TCPSubServer.cpp TCPServer.cpp)
 SRC += $(addprefix $(SRCDIR)/, helpers.cpp main.cpp)
 
 OBJ := $(SRC:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
